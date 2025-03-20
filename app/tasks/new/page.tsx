@@ -33,6 +33,7 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
+import Link from "next/link";
 
 export default function NewTaskPage() {
   const router = useRouter();
@@ -50,7 +51,9 @@ export default function NewTaskPage() {
       <header className="sticky top-0 z-10 border-b bg-background">
         <div className="flex h-16 items-center px-4 sm:px-6">
           <div className="flex items-center gap-2 font-semibold">
-            <span className="text-lg">FamilyTasks</span>
+            <Link href="/tasks/">
+              <span className="text-lg">FamilyTasks</span>
+            </Link>
           </div>
           <div className="ml-auto">
             <ThemeToggle />
@@ -116,6 +119,7 @@ export default function NewTaskPage() {
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
                         <Calendar
+                          required
                           mode="single"
                           selected={date}
                           onSelect={(selectedDate) => {

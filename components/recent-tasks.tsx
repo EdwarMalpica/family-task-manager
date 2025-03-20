@@ -73,6 +73,13 @@ const tasks = [
 export function RecentTasks() {
   const [taskList, setTaskList] = useState(tasks);
 
+  const deleteTask = (taskId:string) => {
+    const tasks = taskList.filter((task) => {
+      return task.id !== taskId;
+    });
+    setTaskList(tasks);
+  };
+
   const toggleTaskStatus = (id: string) => {
     setTaskList(
       taskList.map((task) =>
@@ -87,7 +94,7 @@ export function RecentTasks() {
   };
 
   return (
-    <div className="w-full overflow-auto">
+    <div className="w-full overflow-scroll min-h-68 overflow-y-scroll">
       <Table>
         <TableHeader>
           <TableRow>
@@ -149,11 +156,12 @@ export function RecentTasks() {
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      Reassign
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => {
+                        deleteTask(task.id);
+                      }}
+                    >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
                     </DropdownMenuItem>

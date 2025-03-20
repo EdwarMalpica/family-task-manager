@@ -89,7 +89,7 @@ export default function FamilyPage() {
                   </div>
                   <Progress value={(member.tasksCompleted / member.totalTasks) * 100} />
                 </div>
-                <div>
+                <div className="min-h-64">
                   <h4 className="mb-2 text-sm font-medium">Recent Tasks</h4>
                   <div className="flex flex-wrap gap-2">
                     {member.recentTasks.map((task, i) => (

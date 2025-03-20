@@ -1,17 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { RecentTasks } from "@/components/recent-tasks"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RecentTasks } from "@/components/recent-tasks";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function TasksPage() {
-  const [filter, setFilter] = useState("all")
+  const [filter, setFilter] = useState("all");
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -29,7 +41,9 @@ export default function TasksPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-            <p className="text-muted-foreground">View and manage all family tasks</p>
+            <p className="text-muted-foreground">
+              View and manage all family tasks
+            </p>
           </div>
           <Button asChild>
             <Link href="/tasks/new">Create New Task</Link>
@@ -37,35 +51,11 @@ export default function TasksPage() {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Task Management</CardTitle>
-            <CardDescription>View, filter, and manage all tasks for your family</CardDescription>
-          </CardHeader>
+          <CardHeader></CardHeader>
           <CardContent>
             <Tabs defaultValue="all" className="space-y-4">
               <div className="flex flex-col sm:flex-row justify-between gap-4">
-                <TabsList>
-                  <TabsTrigger value="all">All Tasks</TabsTrigger>
-                  <TabsTrigger value="pending">Pending</TabsTrigger>
-                  <TabsTrigger value="completed">Completed</TabsTrigger>
-                </TabsList>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Select value={filter} onValueChange={setFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Filter by member" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Members</SelectItem>
-                      <SelectItem value="mom">Mom</SelectItem>
-                      <SelectItem value="dad">Dad</SelectItem>
-                      <SelectItem value="emma">Emma</SelectItem>
-                      <SelectItem value="jack">Jack</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="relative">
-                    <Input placeholder="Search tasks..." className="w-full sm:w-[250px]" />
-                  </div>
-                </div>
+                <div className="flex flex-col sm:flex-row gap-2"></div>
               </div>
               <TabsContent value="all" className="space-y-4">
                 <RecentTasks />
@@ -81,6 +71,5 @@ export default function TasksPage() {
         </Card>
       </main>
     </div>
-  )
+  );
 }
-
