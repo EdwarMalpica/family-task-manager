@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  CheckCircle2,
-  Clock,
-  MoreHorizontal,
-  Trash2,
-} from "lucide-react";
+import { CheckCircle2, Clock, MoreHorizontal, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -28,53 +23,17 @@ import { toast } from "@/hooks/use-toast";
 import { useTaskContext } from "@/contexts/TaskContext";
 
 export function RecentTasks() {
-  const { tasks, deleteTask, updateTask,restoreTask } = useTaskContext(); // ✅ Use Task Context
+  const { tasks, deleteTask, updateTask, restoreTask } = useTaskContext(); // ✅ Use Task Context
   const { showDialog } = useAlertDialog();
-
-  // Delete Task Handler with Undo Support
-  // const handleDeleteTask = (taskId: string) => {
-  //   let undo = false;
-
-  //   const taskIndex = tasks.findIndex((task) => task.id === taskId);
-  //   const deletedTask = tasks[taskIndex];
-  //   if (taskIndex === -1) return;
-
-  //   deleteTask(taskId);
-
-  //   const toastInstance = toast({
-  //     title: "Task Deleted",
-  //     description: "The task has been deleted",
-  //     action: (
-  //       <Button
-  //         variant="default"
-  //         size="sm"
-  //         onClick={() => {
-  //           undo = true;
-  //           toastInstance.dismiss();
-  //           console.log("Undo: Task restoration is not yet implemented in context");
-  //         }}
-  //       >
-  //         Undo
-  //       </Button>
-  //     ),
-  //   });
-
-  //   setTimeout(() => {
-  //     if (!undo) {
-  //       console.log("Task permanently deleted");
-  //     }
-  //   }, 5000);
-  // };
-
 
   const handleDeleteTask = (taskId: string) => {
     let undo = false;
-  
+
     const taskIndex = tasks.findIndex((task) => task.id === taskId);
     if (taskIndex === -1) return;
-  
+
     deleteTask(taskId); // ✅ Delete the task
-  
+
     const toastInstance = toast({
       title: "Task Deleted",
       description: "The task has been deleted",
@@ -92,15 +51,13 @@ export function RecentTasks() {
         </Button>
       ),
     });
-  
+
     // If Undo is not clicked within 5 seconds, permanently delete the task
     setTimeout(() => {
       if (!undo) {
-        console.log("Task permanently deleted");
       }
     }, 5000);
   };
-
 
   // Toggle Task Completion Status
   const toggleTaskStatus = (id: string) => {
@@ -148,7 +105,9 @@ export function RecentTasks() {
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={task.status === "completed" ? "success" : "secondary"}
+                    variant={
+                      task.status === "completed" ? "success" : "secondary"
+                    }
                     className="flex w-fit items-center gap-1"
                   >
                     {task.status === "completed" ? (
