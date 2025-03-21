@@ -78,24 +78,29 @@ export function RecentTasks() {
 
   const deleteTask = (taskId: string) => {
     let undo = false;
-    const deletedTask = taskList.find((task) => task.id === taskId);
-    if (!deletedTask) return;
+
+    const taskIndex = taskList.findIndex((task) => task.id === taskId);
+    const deletedTask = taskList[taskIndex];
+    if (taskIndex === -1) return;
 
     const updatedTasks = taskList.filter((task) => task.id !== taskId);
     setTaskList(updatedTasks);
-
     const toastInstance = toast({
       title: "Task Deleted",
-      description: `The task has been deleted`,
+      description: "The task has been deleted",
       action: (
         <Button
           variant="default"
           size="sm"
           onClick={() => {
             undo = true;
-            setTaskList((prev) => [...prev, deletedTask]);
+            setTaskList((prev) => {
+              const newList = [...prev];
+              newList.splice(taskIndex, 0, deletedTask);
+              return newList;
+            });
             toastInstance.dismiss();
-            console.log("Undo: Task restored");
+            console.log("Undo: Task restored at index", taskIndex);
           }}
         >
           Undo
