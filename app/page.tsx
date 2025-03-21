@@ -10,7 +10,6 @@ import {
 import { Overview } from "@/components/overview";
 import { RecentTasks } from "@/components/recent-tasks";
 import { FamilyProgress } from "@/components/family-progress";
-import { UserNav } from "@/components/user-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function DashboardPage() {
@@ -25,7 +24,6 @@ export default function DashboardPage() {
           </div>
           <nav className="ml-auto flex items-center gap-4 sm:gap-6">
             <ThemeToggle />
-            <UserNav />
           </nav>
         </div>
       </header>
