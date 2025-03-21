@@ -23,7 +23,7 @@ import { toast } from "@/hooks/use-toast";
 import { useTaskContext } from "@/contexts/TaskContext";
 
 export function RecentTasks() {
-  const { tasks, deleteTask, updateTask, restoreTask } = useTaskContext(); // ✅ Use Task Context
+  const { tasks, deleteTask, updateTask, restoreTask } = useTaskContext();
   const { showDialog } = useAlertDialog();
 
   const handleDeleteTask = (taskId: string) => {
@@ -32,7 +32,7 @@ export function RecentTasks() {
     const taskIndex = tasks.findIndex((task) => task.id === taskId);
     if (taskIndex === -1) return;
 
-    deleteTask(taskId); // ✅ Delete the task
+    deleteTask(taskId);
 
     const toastInstance = toast({
       title: "Task Deleted",
@@ -43,7 +43,7 @@ export function RecentTasks() {
           size="sm"
           onClick={() => {
             undo = true;
-            restoreTask(); // ✅ Restore task when Undo is clicked
+            restoreTask();
             toastInstance.dismiss();
           }}
         >
@@ -52,14 +52,12 @@ export function RecentTasks() {
       ),
     });
 
-    // If Undo is not clicked within 5 seconds, permanently delete the task
     setTimeout(() => {
       if (!undo) {
       }
     }, 5000);
   };
 
-  // Toggle Task Completion Status
   const toggleTaskStatus = (id: string) => {
     const task = tasks.find((task) => task.id === id);
     if (!task) return;

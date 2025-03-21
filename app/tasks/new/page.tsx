@@ -33,12 +33,12 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
-import { useTaskContext } from "@/contexts/TaskContext"; // ✅ Import Task Context
+import { useTaskContext } from "@/contexts/TaskContext";
 import { toast } from "@/hooks/use-toast";
 
 export default function NewTaskPage() {
   const router = useRouter();
-  const { addTask } = useTaskContext(); // ✅ Use Task Context
+  const { addTask } = useTaskContext();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -56,21 +56,20 @@ export default function NewTaskPage() {
     }
 
     const newTask = {
-      id: crypto.randomUUID(), // Generate a unique ID
+      id: crypto.randomUUID(),
       title,
       assignee,
-      dueDate: date.toISOString().split("T")[0], // Format as YYYY-MM-DD
+      dueDate: date.toISOString().split("T")[0],
       status: "pending",
       recurring,
     };
 
-    addTask(newTask); // ✅ Add task to context
-    router.push("/"); // Redirect to home
+    addTask(newTask);
+    router.push("/");
     toast({
       title: "Task Created",
       description: "The task created successfully",
     });
-    
   };
 
   return (

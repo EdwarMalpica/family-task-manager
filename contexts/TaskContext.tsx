@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, ReactNode, useRef } from "react";
 
-// Task Type Definition
 type Task = {
   id: string;
   title: string;
@@ -12,14 +11,12 @@ type Task = {
   recurring: "daily" | "weekly" | "biweekly";
 };
 
-// Analytics Type Definition
 type AnalyticsData = {
   name: string;
   completed: number;
   total: number;
 };
 
-// Context Value Type
 type TaskContextType = {
   tasks: Task[];
   analytics: AnalyticsData[];
@@ -29,10 +26,8 @@ type TaskContextType = {
   restoreTask: () => void;
 };
 
-// Create Context
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
-// Initial Data
 const initialTasks: Task[] = [
   {
     id: "1",
@@ -86,17 +81,14 @@ const initialAnalytics: AnalyticsData[] = [
   { name: "Sun", completed: 3, total: 5 },
 ];
 
-// Props Type for Provider
 type TaskProviderProps = {
   children: ReactNode;
 };
 
-// Provider Component
 export function TaskProvider({ children }: TaskProviderProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [analytics] = useState<AnalyticsData[]>(initialAnalytics);
 
-  // CRUD Operations
   const addTask = (task: Task) => setTasks((prevTasks) => [...prevTasks, task]);
 
   const updateTask = (id: string, updatedTask: Partial<Task>) => {
@@ -107,22 +99,13 @@ export function TaskProvider({ children }: TaskProviderProps) {
     );
   };
 
-  // const deleteTask = (id: string) => {
-  //   setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
-  // };
-
-  // const [tasks, setTasks] = useState<Task[]>([]);
-
-  // ✅ Store the last deleted task for Undo
   const lastDeletedTask = useRef<Task | null>(null);
 
-  // ✅ Delete Task
   const deleteTask = (taskId: string) => {
     lastDeletedTask.current = tasks.find((task) => task.id === taskId) || null;
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
   };
 
-  // ✅ Restore Task
   const restoreTask = () => {
     if (lastDeletedTask.current) {
       setTasks((prevTasks) => [...prevTasks, lastDeletedTask.current!]);
@@ -132,14 +115,13 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
   return (
     <TaskContext.Provider
-      value={{ tasks, analytics, addTask, updateTask, deleteTask,restoreTask }}
+      value={{ tasks, analytics, addTask, updateTask, deleteTask, restoreTask }}
     >
       {children}
     </TaskContext.Provider>
   );
 }
 
-// Custom Hook for Consuming Context
 export function useTaskContext() {
   const context = useContext(TaskContext);
   if (!context) {
