@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,12 @@ import { Overview } from "@/components/overview";
 import { RecentTasks } from "@/components/recent-tasks";
 import { FamilyProgress } from "@/components/family-progress";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { toast } from "@/hooks/use-toast";
+import { useAlertDialog } from "@/contexts/AlertDialogContext";
+
 
 export default function DashboardPage() {
+  const {showDialog} = useAlertDialog()
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b bg-background">
@@ -28,6 +33,26 @@ export default function DashboardPage() {
         </div>
       </header>
       <main className="flex-1 space-y-4 p-4 pt-6 sm:p-6 sm:pt-8">
+        <button
+          className="bg-red-500"
+          onClick={() =>
+            // toast({ title: "Test Toast", description: "It works!" })
+
+            showDialog({
+              title: "Are you sure?",
+              description: "",
+              onConfirm: () => {
+                // handleToggleWatchlist(movie)
+                // deleteTask(task.id);
+                console.log(`44`)
+              },
+            })
+
+
+          }
+        >
+          Show Toast
+        </button>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>

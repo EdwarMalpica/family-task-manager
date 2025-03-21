@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAlertDialog } from "@/contexts/AlertDialogContext";
 
 const tasks = [
   {
@@ -72,6 +73,7 @@ const tasks = [
 
 export function RecentTasks() {
   const [taskList, setTaskList] = useState(tasks);
+  const { showDialog } = useAlertDialog();
 
   const deleteTask = (taskId: string) => {
     const tasks = taskList.filter((task) => {
@@ -153,7 +155,15 @@ export function RecentTasks() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => deleteTask(task.id)}
+                        onClick={() =>
+                          showDialog({
+                            title: "Are you sure?",
+                            description: "",
+                            onConfirm: () => {
+                              deleteTask(task.id);
+                            },
+                          })
+                        }
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
