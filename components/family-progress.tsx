@@ -9,32 +9,23 @@ const data = [
   { name: "Jack", value: 6, color: "#ff8042" },
 ]
 
-// export function FamilyProgress() {
-//   return (
-//     <div className="h-[300px] w-full">
-//       <ResponsiveContainer width="100%" height="100%">
-//         <PieChart>
-//           <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-//             {data.map((entry, index) => (
-//               <Cell key={`cell-${index}`} fill={entry.color} />
-//             ))}
-//           </Pie>
-//           <Tooltip
-//             contentStyle={{
-//               backgroundColor: "var(--background)",
-//               color: "var(--foreground)",
-//               borderColor: "var(--border)",
-//             }}
-//           />
-//           <Legend />
-//         </PieChart>
-//       </ResponsiveContainer>
-//     </div>
-//   )
-// }
-
+import { useEffect, useState } from "react";
 
 const CustomPieTooltip = ({ active, payload }: any) => {
+  const [isMdScreen, setIsMdScreen] = useState(false);
+
+  useEffect(() => {
+    // Function to check screen width
+    const checkScreenSize = () => {
+      setIsMdScreen(window.innerWidth >= 768); // Tailwind's 'md' breakpoint is 768px
+    };
+
+    checkScreenSize(); // Run on mount
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
   if (!active || !payload || payload.length === 0) return null;
 
   return (
@@ -42,13 +33,15 @@ const CustomPieTooltip = ({ active, payload }: any) => {
       className="bg-white text-black border border-gray-300 rounded-md p-2 shadow-md"
       style={{
         position: "absolute",
-        left: "50%", // Centered horizontally
-        top: "20px", // Fixed position at the top
-        transform: "translate(400%,200%)", // Center it properly
+        left: "50%",
+        top: "20px",
+        transform: isMdScreen ? "translate(400%, 200%)" : "translate(-50%, 0)", // Apply only on md+
         pointerEvents: "none",
       }}
     >
-      <p className="whitespace-nowrap text-sm font-semibold">{payload[0].payload.name}</p>
+      <p className="whitespace-nowrap text-sm font-semibold">
+        {payload[0].payload.name}
+      </p>
       <p className="whitespace-nowrap text-xs">Value: {payload[0].value}</p>
     </div>
   );
@@ -56,7 +49,7 @@ const CustomPieTooltip = ({ active, payload }: any) => {
 
 export function FamilyProgress() {
   return (
-    <div className="relative h-[300px] w-full">
+    <div className="relative h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
