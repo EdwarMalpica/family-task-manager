@@ -66,11 +66,12 @@ export function Overview() {
             content={<CustomTooltip />}
             cursor={{ fill: "transparent" }}
           />
+
           <Bar
             dataKey="total"
             fill="currentColor"
             radius={[4, 4, 0, 0]}
-            className="fill-primary-400 opacity-30"
+            className="fill-primary-400 opacity-30 dark:fill-gray-500 dark:opacity-70"
           />
           <Bar
             dataKey="completed"
