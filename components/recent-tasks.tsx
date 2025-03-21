@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAlertDialog } from "@/contexts/AlertDialogContext";
+import { toast } from "@/hooks/use-toast";
 
 const tasks = [
   {
@@ -76,10 +77,37 @@ export function RecentTasks() {
   const { showDialog } = useAlertDialog();
 
   const deleteTask = (taskId: string) => {
-    const tasks = taskList.filter((task) => {
-      return task.id !== taskId;
+    let undo = false;
+    const deletedTask = taskList.find((task) => task.id === taskId);
+    if (!deletedTask) return;
+
+    const updatedTasks = taskList.filter((task) => task.id !== taskId);
+    setTaskList(updatedTasks);
+
+    const toastInstance = toast({
+      title: "Task Deleted",
+      description: `The task has been deleted`,
+      action: (
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => {
+            undo = true;
+            setTaskList((prev) => [...prev, deletedTask]);
+            toastInstance.dismiss();
+            console.log("Undo: Task restored");
+          }}
+        >
+          Undo
+        </Button>
+      ),
     });
-    setTaskList(tasks);
+
+    setTimeout(() => {
+      if (!undo) {
+        console.log("Task permanently deleted");
+      }
+    }, 5000);
   };
 
   const toggleTaskStatus = (id: string) => {
@@ -154,7 +182,7 @@ export function RecentTasks() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        className="text-destructive"
+                        className="text-primary"
                         onClick={() =>
                           showDialog({
                             title: "Are you sure?",
