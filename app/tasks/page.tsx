@@ -40,20 +40,20 @@ export default function TasksPage() {
         </div>
       </header>
       <main className="flex-1 space-y-4 p-4 pt-6 sm:p-6 sm:pt-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-            <p className="text-muted-foreground">
-              View and manage all family tasks
-            </p>
-          </div>
-          <Button asChild>
-            <Link href="/tasks/new">Create New Task</Link>
-          </Button>
-        </div>
-
         <Card>
-          <CardHeader></CardHeader>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">All Tasks</h1>
+                <p className="text-muted-foreground">
+                  View and manage all family tasks
+                </p>
+              </div>
+              <Button asChild>
+                <Link href="/tasks/new">Create New Task</Link>
+              </Button>
+            </div>
+          </CardHeader>
           <CardContent>
             <Tabs defaultValue="all" className="space-y-4">
               <div className="flex flex-col sm:flex-row justify-between gap-4">
