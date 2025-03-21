@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import {
   CheckCircle2,
   Clock,
-  Edit,
   MoreHorizontal,
   Trash2,
-  User,
 } from "lucide-react";
 import {
   Table,
@@ -28,63 +25,56 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAlertDialog } from "@/contexts/AlertDialogContext";
 import { toast } from "@/hooks/use-toast";
-
-const tasks = [
-  {
-    id: "1",
-    title: "Take out the trash",
-    assignee: "Dad",
-    dueDate: "2023-05-15",
-    status: "completed",
-    recurring: "weekly",
-  },
-  {
-    id: "2",
-    title: "Do the dishes",
-    assignee: "Emma",
-    dueDate: "2023-05-14",
-    status: "pending",
-    recurring: "daily",
-  },
-  {
-    id: "3",
-    title: "Vacuum living room",
-    assignee: "Mom",
-    dueDate: "2023-05-16",
-    status: "pending",
-    recurring: "weekly",
-  },
-  {
-    id: "4",
-    title: "Mow the lawn",
-    assignee: "Dad",
-    dueDate: "2023-05-20",
-    status: "pending",
-    recurring: "biweekly",
-  },
-  {
-    id: "5",
-    title: "Clean bedroom",
-    assignee: "Jack",
-    dueDate: "2023-05-13",
-    status: "completed",
-    recurring: "weekly",
-  },
-];
+import { useTaskContext } from "@/contexts/TaskContext";
 
 export function RecentTasks() {
-  const [taskList, setTaskList] = useState(tasks);
+  const { tasks, deleteTask, updateTask,restoreTask } = useTaskContext(); // ✅ Use Task Context
   const { showDialog } = useAlertDialog();
 
-  const deleteTask = (taskId: string) => {
+  // Delete Task Handler with Undo Support
+  // const handleDeleteTask = (taskId: string) => {
+  //   let undo = false;
+
+  //   const taskIndex = tasks.findIndex((task) => task.id === taskId);
+  //   const deletedTask = tasks[taskIndex];
+  //   if (taskIndex === -1) return;
+
+  //   deleteTask(taskId);
+
+  //   const toastInstance = toast({
+  //     title: "Task Deleted",
+  //     description: "The task has been deleted",
+  //     action: (
+  //       <Button
+  //         variant="default"
+  //         size="sm"
+  //         onClick={() => {
+  //           undo = true;
+  //           toastInstance.dismiss();
+  //           console.log("Undo: Task restoration is not yet implemented in context");
+  //         }}
+  //       >
+  //         Undo
+  //       </Button>
+  //     ),
+  //   });
+
+  //   setTimeout(() => {
+  //     if (!undo) {
+  //       console.log("Task permanently deleted");
+  //     }
+  //   }, 5000);
+  // };
+
+
+  const handleDeleteTask = (taskId: string) => {
     let undo = false;
-
-    const taskIndex = taskList.findIndex((task) => task.id === taskId);
-    const deletedTask = taskList[taskIndex];
+  
+    const taskIndex = tasks.findIndex((task) => task.id === taskId);
     if (taskIndex === -1) return;
-
-    const updatedTasks = taskList.filter((task) => task.id !== taskId);
-    setTaskList(updatedTasks);
+  
+    deleteTask(taskId); // ✅ Delete the task
+  
     const toastInstance = toast({
       title: "Task Deleted",
       description: "The task has been deleted",
@@ -94,20 +84,16 @@ export function RecentTasks() {
           size="sm"
           onClick={() => {
             undo = true;
-            setTaskList((prev) => {
-              const newList = [...prev];
-              newList.splice(taskIndex, 0, deletedTask);
-              return newList;
-            });
+            restoreTask(); // ✅ Restore task when Undo is clicked
             toastInstance.dismiss();
-            console.log("Undo: Task restored at index", taskIndex);
           }}
         >
           Undo
         </Button>
       ),
     });
-
+  
+    // If Undo is not clicked within 5 seconds, permanently delete the task
     setTimeout(() => {
       if (!undo) {
         console.log("Task permanently deleted");
@@ -115,17 +101,15 @@ export function RecentTasks() {
     }, 5000);
   };
 
+
+  // Toggle Task Completion Status
   const toggleTaskStatus = (id: string) => {
-    setTaskList(
-      taskList.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              status: task.status === "completed" ? "pending" : "completed",
-            }
-          : task
-      )
-    );
+    const task = tasks.find((task) => task.id === id);
+    if (!task) return;
+
+    updateTask(id, {
+      status: task.status === "completed" ? "pending" : "completed",
+    });
   };
 
   return (
@@ -143,8 +127,8 @@ export function RecentTasks() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {taskList.length > 0 ? (
-            taskList.map((task) => (
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
               <TableRow key={task.id}>
                 <TableCell>
                   <Checkbox
@@ -164,9 +148,7 @@ export function RecentTasks() {
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={
-                      task.status === "completed" ? "success" : "secondary"
-                    }
+                    variant={task.status === "completed" ? "success" : "secondary"}
                     className="flex w-fit items-center gap-1"
                   >
                     {task.status === "completed" ? (
@@ -193,7 +175,7 @@ export function RecentTasks() {
                             title: "Are you sure?",
                             description: "",
                             onConfirm: () => {
-                              deleteTask(task.id);
+                              handleDeleteTask(task.id);
                             },
                           })
                         }

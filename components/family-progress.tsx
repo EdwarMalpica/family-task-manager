@@ -1,28 +1,26 @@
-"use client"
-
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
-
-const data = [
-  { name: "Mom", value: 12, color: "#8884d8" },
-  { name: "Dad", value: 10, color: "#82ca9d" },
-  { name: "Emma", value: 8, color: "#ffc658" },
-  { name: "Jack", value: 6, color: "#ff8042" },
-]
+"use client";
 
 import { useEffect, useState } from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from "recharts";
+import { useTaskContext } from "@/contexts/TaskContext"; // ✅ Import Task Context
 
 const CustomPieTooltip = ({ active, payload }: any) => {
   const [isMdScreen, setIsMdScreen] = useState(false);
 
   useEffect(() => {
-    // Function to check screen width
     const checkScreenSize = () => {
-      setIsMdScreen(window.innerWidth >= 768); // Tailwind's 'md' breakpoint is 768px
+      setIsMdScreen(window.innerWidth >= 768);
     };
 
-    checkScreenSize(); // Run on mount
+    checkScreenSize();
     window.addEventListener("resize", checkScreenSize);
-
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
@@ -35,37 +33,50 @@ const CustomPieTooltip = ({ active, payload }: any) => {
         position: "absolute",
         left: "50%",
         top: "20px",
-        transform: isMdScreen ? "translate(400%, 200%)" : "translate(-50%, 0)", // Apply only on md+
+        transform: isMdScreen ? "translate(400%, 200%)" : "translate(-50%, 0)",
         pointerEvents: "none",
       }}
     >
       <p className="whitespace-nowrap text-sm font-semibold">
         {payload[0].payload.name}
       </p>
-      <p className="whitespace-nowrap text-xs">Value: {payload[0].value}</p>
+      <p className="whitespace-nowrap text-xs">Tasks: {payload[0].value}</p>
     </div>
   );
 };
 
 export function FamilyProgress() {
+  const { tasks } = useTaskContext();
+  
+
+  const taskCounts = tasks.reduce((acc: Record<string, number>, task) => {
+    acc[task.assignee] = (acc[task.assignee] || 0) + 1;
+    return acc;
+  }, {});
+
+  const data = Object.keys(taskCounts).map((name) => ({
+    name,
+    value: taskCounts[name],
+    color:
+      name === "Mom"
+        ? "#8884d8"
+        : name === "Dad"
+        ? "#82ca9d"
+        : name === "Emma"
+        ? "#ffc658"
+        : "#ff8042",
+  }));
+
   return (
     <div className="relative h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={80}
-            paddingAngle={5}
-            dataKey="value"
-          >
+          <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip content={<CustomPieTooltip />} />
+          <Tooltip />
           <Legend />
         </PieChart>
       </ResponsiveContainer>

@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -34,16 +33,44 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
+import { useTaskContext } from "@/contexts/TaskContext"; // ✅ Import Task Context
+import { toast } from "@/hooks/use-toast";
 
 export default function NewTaskPage() {
   const router = useRouter();
-  const [date, setDate] = useState<Date>();
+  const { addTask } = useTaskContext(); // ✅ Use Task Context
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [assignee, setAssignee] = useState("");
+  const [recurring, setRecurring] = useState("");
+  const [date, setDate] = useState<Date>(new Date());
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would normally save the task to your database
-    router.push("/");
+
+    if (!title || !assignee || !date || !recurring) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const newTask = {
+      id: crypto.randomUUID(), // Generate a unique ID
+      title,
+      assignee,
+      dueDate: date.toISOString().split("T")[0], // Format as YYYY-MM-DD
+      status: "pending",
+      recurring,
+    };
+
+    addTask(newTask); // ✅ Add task to context
+    router.push("/"); // Redirect to home
+    toast({
+      title: "Task Created",
+      description: "The task created successfully",
+    });
+    
   };
 
   return (
@@ -73,7 +100,13 @@ export default function NewTaskPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Task Title</Label>
-                  <Input id="title" placeholder="Enter task title" required />
+                  <Input
+                    id="title"
+                    placeholder="Enter task title"
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
@@ -81,20 +114,22 @@ export default function NewTaskPage() {
                     id="description"
                     placeholder="Enter task description"
                     className="min-h-[100px]"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="assignee">Assign To</Label>
-                    <Select>
+                    <Select onValueChange={setAssignee}>
                       <SelectTrigger id="assignee">
                         <SelectValue placeholder="Select family member" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="mom">Mom</SelectItem>
-                        <SelectItem value="dad">Dad</SelectItem>
-                        <SelectItem value="emma">Emma</SelectItem>
-                        <SelectItem value="jack">Jack</SelectItem>
+                        <SelectItem value="Mom">Mom</SelectItem>
+                        <SelectItem value="Dad">Dad</SelectItem>
+                        <SelectItem value="Emma">Emma</SelectItem>
+                        <SelectItem value="Jack">Jack</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -133,7 +168,7 @@ export default function NewTaskPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="recurring">Recurring</Label>
-                  <Select>
+                  <Select onValueChange={setRecurring}>
                     <SelectTrigger id="recurring">
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>

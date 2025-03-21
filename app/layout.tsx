@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { AlertDialogProvider } from "@/contexts/AlertDialogContext";
 import { GlobalAlertDialog } from "@/components/GlobalAlertDialog";
+import { TaskProvider } from "@/contexts/TaskContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,16 +24,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <AlertDialogProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster />
-            <GlobalAlertDialog />
-          </ThemeProvider>
+          <TaskProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster />
+              <GlobalAlertDialog />
+            </ThemeProvider>
+          </TaskProvider>
         </AlertDialogProvider>
       </body>
     </html>
