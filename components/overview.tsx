@@ -48,7 +48,11 @@ export function Overview() {
   return (
     <div className="relative">
       <ResponsiveContainer width="100%" height={350}>
-        <BarChart data={data}>
+        <BarChart 
+        data={data}
+        margin={{ left: -30 }} 
+
+        >
           <XAxis
             dataKey="name"
             stroke="#888888"
