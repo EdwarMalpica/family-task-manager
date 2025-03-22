@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, Clock, MoreHorizontal, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, Clock, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,24 +12,37 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAlertDialog } from "@/contexts/AlertDialogContext";
 import { toast } from "@/hooks/use-toast";
 import { useTaskContext } from "@/contexts/TaskContext";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export function RecentTasks() {
   const { tasks, deleteTask, updateTask, restoreTask } = useTaskContext();
   const { showDialog } = useAlertDialog();
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const tasksPerPage = 5;
+
+  // Calculate paginated tasks
+  const totalPages = Math.ceil(tasks.length / tasksPerPage);
+  const paginatedTasks = tasks.slice(
+    (currentPage - 1) * tasksPerPage,
+    currentPage * tasksPerPage
+  );
+
   const handleDeleteTask = (taskId: string) => {
     let undo = false;
-
     const taskIndex = tasks.findIndex((task) => task.id === taskId);
     if (taskIndex === -1) return;
 
@@ -68,7 +82,7 @@ export function RecentTasks() {
   };
 
   return (
-    <div className="w-full overflow-scroll min-h-68 overflow-y-scroll">
+    <div className="w-full overflow-scroll min-h-68 overflow-y-scroll overflow-x-scroll">
       <Table>
         <TableHeader>
           <TableRow>
@@ -82,8 +96,8 @@ export function RecentTasks() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tasks.length > 0 ? (
-            tasks.map((task) => (
+          {paginatedTasks.length > 0 ? (
+            paginatedTasks.map((task) => (
               <TableRow key={task.id}>
                 <TableCell>
                   <Checkbox
@@ -116,32 +130,20 @@ export function RecentTasks() {
                     <span className="capitalize">{task.status}</span>
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="text-primary"
-                        onClick={() =>
-                          showDialog({
-                            title: "Are you sure?",
-                            description: "",
-                            onConfirm: () => {
-                              handleDeleteTask(task.id);
-                            },
-                          })
-                        }
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <TableCell className="flex justify-center">
+                  <Trash2
+                    className="h-4 w-4 cursor-pointer hover:opacity-50 delay-200 ease-in-out"
+                    onClick={() =>
+                      showDialog({
+                        title: "Delete Task?",
+                        description:
+                          "Are you sure you want to delete the task?",
+                        onConfirm: () => {
+                          handleDeleteTask(task.id);
+                        },
+                      })
+                    }
+                  />
                 </TableCell>
               </TableRow>
             ))
@@ -154,6 +156,45 @@ export function RecentTasks() {
           )}
         </TableBody>
       </Table>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <Pagination className="flex flex-col justify-end items-center">
+          <PaginationContent>
+            <PaginationItem>
+              {/* <PaginationPrevious
+                // href="#"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              /> */}
+            </PaginationItem>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <PaginationItem key={i} className="cursor-pointer">
+                <PaginationLink
+                  // href="#"
+                  isActive={i + 1 === currentPage}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            {/* {totalPages > 2 && <PaginationEllipsis />} */}
+
+            <PaginationItem>
+              {/* <PaginationNext
+                // href="#"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+              /> */}
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }

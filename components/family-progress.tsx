@@ -49,8 +49,15 @@ export function FamilyProgress() {
   const { tasks } = useTaskContext();
   
 
+  // const taskCounts = tasks.reduce((acc: Record<string, number>, task) => {
+  //   acc[task.assignee] = (acc[task.assignee] || 0) + 1;
+  //   return acc;
+  // }, {});
+
   const taskCounts = tasks.reduce((acc: Record<string, number>, task) => {
-    acc[task.assignee] = (acc[task.assignee] || 0) + 1;
+    if (task.status === "completed") { // Only count completed tasks
+      acc[task.assignee] = (acc[task.assignee] || 0) + 1;
+    }
     return acc;
   }, {});
 

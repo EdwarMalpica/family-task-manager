@@ -14,11 +14,11 @@ import { useAlertDialog } from "@/contexts/AlertDialogContext";
 export function GlobalAlertDialog() {
   const { isOpen, hideDialog, options } = useAlertDialog();
 
-  if (!options) return null; // Don't render if there's no dialog data
+  if (!options) return null;
 
   return (
     <AlertDialog open={isOpen} onOpenChange={hideDialog}>
-      <AlertDialogContent>
+      <AlertDialogContent className="w-5/6">
         <AlertDialogHeader>
           <AlertDialogTitle>{options.title}</AlertDialogTitle>
           <AlertDialogDescription>{options.description}</AlertDialogDescription>

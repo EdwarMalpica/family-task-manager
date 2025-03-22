@@ -11,15 +11,15 @@ type Task = {
   recurring: "daily" | "weekly" | "biweekly";
 };
 
-type AnalyticsData = {
-  name: string;
-  completed: number;
-  total: number;
-};
+// type AnalyticsData = {
+//   name: string;
+//   completed: number;
+//   total: number;
+// };
 
 type TaskContextType = {
   tasks: Task[];
-  analytics: AnalyticsData[];
+  // analytics: AnalyticsData[];
   addTask: (task: Task) => void;
   updateTask: (id: string, updatedTask: Partial<Task>) => void;
   deleteTask: (id: string) => void;
@@ -69,17 +69,25 @@ const initialTasks: Task[] = [
     status: "completed",
     recurring: "weekly",
   },
+  {
+    id: "6",
+    title: "Buy groceries..",
+    assignee: "Jack",
+    dueDate: "2023-05-13",
+    status: "completed",
+    recurring: "weekly",
+  },
 ];
 
-const initialAnalytics: AnalyticsData[] = [
-  { name: "Mon", completed: 4, total: 6 },
-  { name: "Tue", completed: 3, total: 5 },
-  { name: "Wed", completed: 5, total: 7 },
-  { name: "Thu", completed: 2, total: 4 },
-  { name: "Fri", completed: 6, total: 8 },
-  { name: "Sat", completed: 4, total: 6 },
-  { name: "Sun", completed: 3, total: 5 },
-];
+// const initialAnalytics: AnalyticsData[] = [
+//   { name: "Mon", completed: 4, total: 6 },
+//   { name: "Tue", completed: 3, total: 5 },
+//   { name: "Wed", completed: 5, total: 7 },
+//   { name: "Thu", completed: 2, total: 4 },
+//   { name: "Fri", completed: 6, total: 8 },
+//   { name: "Sat", completed: 4, total: 6 },
+//   { name: "Sun", completed: 3, total: 5 },
+// ];
 
 type TaskProviderProps = {
   children: ReactNode;
@@ -87,7 +95,7 @@ type TaskProviderProps = {
 
 export function TaskProvider({ children }: TaskProviderProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [analytics] = useState<AnalyticsData[]>(initialAnalytics);
+  // const [analytics] = useState<AnalyticsData[]>(initialAnalytics);
 
   const addTask = (task: Task) => setTasks((prevTasks) => [...prevTasks, task]);
 
@@ -115,7 +123,7 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
   return (
     <TaskContext.Provider
-      value={{ tasks, analytics, addTask, updateTask, deleteTask, restoreTask }}
+      value={{ tasks, addTask, updateTask, deleteTask, restoreTask }}
     >
       {children}
     </TaskContext.Provider>

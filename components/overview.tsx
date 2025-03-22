@@ -8,17 +8,9 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
-import { useState } from "react";
-
-const data = [
-  { name: "Mon", completed: 4, total: 6 },
-  { name: "Tue", completed: 3, total: 5 },
-  { name: "Wed", completed: 5, total: 7 },
-  { name: "Thu", completed: 2, total: 4 },
-  { name: "Fri", completed: 6, total: 8 },
-  { name: "Sat", completed: 4, total: 6 },
-  { name: "Sun", completed: 3, total: 5 },
-];
+import { useTaskContext } from "@/contexts/TaskContext"; // Adjust the import as needed
+import { useMemo } from "react";
+import dayjs from "dayjs";
 
 const CustomTooltip = ({ active, payload, coordinate }: any) => {
   if (!active || !payload || payload.length === 0) return null;
@@ -45,14 +37,36 @@ const CustomTooltip = ({ active, payload, coordinate }: any) => {
 };
 
 export function Overview() {
+  const { tasks } = useTaskContext();
+
+  // Generate the analytics data from tasks
+  const data = useMemo(() => {
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    // Initialize structure for each day
+    const groupedData = daysOfWeek.reduce((acc, day) => {
+      acc[day] = { name: day, completed: 0, total: 0 };
+      return acc;
+    }, {} as Record<string, { name: string; completed: number; total: number }>);
+
+    // Populate the data
+    tasks.forEach((task) => {
+      const dayName = dayjs(task.dueDate).format("ddd"); // Get day abbreviation (e.g., "Mon")
+      if (groupedData[dayName]) {
+        groupedData[dayName].total += 1;
+        if (task.status === "completed") {
+          groupedData[dayName].completed += 1;
+        }
+      }
+    });
+
+    return Object.values(groupedData); // Convert back to array
+  }, [tasks]);
+
   return (
     <div className="relative">
       <ResponsiveContainer width="100%" height={350}>
-        <BarChart 
-        data={data}
-        margin={{ left: -30 }} 
-
-        >
+        <BarChart data={data} margin={{ left: -30 }}>
           <XAxis
             dataKey="name"
             stroke="#888888"
