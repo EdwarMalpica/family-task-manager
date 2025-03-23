@@ -115,7 +115,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* Modal para crear tareas */}
       <CreateTaskModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
     </div>
   )
