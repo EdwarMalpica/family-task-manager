@@ -34,6 +34,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const router = useRouter()
   const { addTask } = useTaskContext()
 
+  // Initialize with null and set date in effect
   const [date, setDate] = useState<Date | null>(null)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [title, setTitle] = useState("")
@@ -41,12 +42,14 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const [assignee, setAssignee] = useState("")
   const [recurring, setRecurring] = useState("")
 
+  // Set initial date only when modal opens
   useEffect(() => {
     if (open) {
       setDate(new Date())
     }
   }, [open])
 
+  // Reset form when modal closes
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
@@ -55,7 +58,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
         setAssignee("")
         setRecurring("")
         setDate(null)
-      }, 300) 
+      }, 300) // Small delay for closing animation to finish
     }
   }, [open])
 
@@ -90,7 +93,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-w-[calc(100%-2rem)] mx-auto my-4 rounded-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create New Task</DialogTitle>
@@ -176,11 +179,13 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
               </Select>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)} className="sm:order-1 order-2">
               Cancel
             </Button>
-            <Button type="submit">Create Task</Button>
+            <Button type="submit" className="sm:order-2 order-1">
+              Create Task
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

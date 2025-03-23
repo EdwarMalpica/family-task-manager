@@ -41,6 +41,7 @@ const CustomPieTooltip = ({ active, payload }: any) => {
 export function FamilyProgress() {
   const { tasks } = useTaskContext()
 
+  // Only count completed tasks by member
   const taskCounts = tasks.reduce((acc: Record<string, number>, task) => {
     if (task.status === "completed") {
       acc[task.assignee] = (acc[task.assignee] || 0) + 1
@@ -48,16 +49,18 @@ export function FamilyProgress() {
     return acc
   }, {})
 
+  // Convert to chart format and remove members with no completed tasks
   const data = Object.keys(taskCounts)
-    .filter((name) => taskCounts[name] > 0) 
+    .filter((name) => taskCounts[name] > 0) // Only include members with completed tasks
     .map((name, index) => ({
       name,
       value: taskCounts[name],
       color: COLORS[index % COLORS.length],
     }))
 
+  // If no data, show a message
   if (data.length === 0) {
-    return <div className="flex justify-center items-center h-[300px]">No tasks completed yet</div>
+    return <div className="flex justify-center items-center h-[300px]">No completed tasks</div>
   }
 
   return (

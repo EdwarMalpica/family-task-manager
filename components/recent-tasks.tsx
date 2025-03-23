@@ -67,11 +67,15 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
   const totalPages = Math.ceil(filteredTasks.length / tasksPerPage)
   const paginatedTasks = filteredTasks.slice((currentPage - 1) * tasksPerPage, currentPage * tasksPerPage)
 
+  // Maintain scroll position when page changes
   const handlePageChange = (newPage: number) => {
+    // Save current scroll position
     const scrollPosition = window.scrollY
 
+    // Change page
     setCurrentPage(newPage)
 
+    // Restore scroll position after DOM update
     setTimeout(() => {
       window.scrollTo(0, scrollPosition)
     }, 0)
@@ -255,9 +259,9 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
                       <span className="capitalize">{task.status}</span>
                     </Badge>
                   </TableCell>
-                  <TableCell className="flex justify-center">
+                  <TableCell className="text-right">
                     <Trash2
-                      className="h-4 w-4 cursor-pointer hover:opacity-50 delay-200 ease-in-out mt-5 md:mt-0"
+                      className="h-4 w-4 cursor-pointer hover:opacity-50 delay-200 ease-in-out ml-auto"
                       onClick={() =>
                         showDialog({
                           title: "Delete Task?",

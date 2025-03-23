@@ -23,6 +23,7 @@ export default function NewTaskPage() {
   const router = useRouter()
   const { addTask } = useTaskContext()
 
+  // Issue: Date initialization with new Date() changes on each render
   const [date, setDate] = useState<Date>(new Date())
   const [isOpen, setIsOpen] = useState(false)
   const [title, setTitle] = useState("")
