@@ -32,11 +32,9 @@ const CustomTooltip = ({ active, payload, coordinate }: any) => {
 export function Overview() {
   const { tasks } = useTaskContext()
 
-  // Problema: Uso de dayjs que puede generar diferentes resultados
   const data = useMemo(() => {
     const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
-    // Inicializa estructura para cada día
     const groupedData = daysOfWeek.reduce(
       (acc, day) => {
         acc[day] = { name: day, completed: 0, total: 0 }
@@ -45,9 +43,8 @@ export function Overview() {
       {} as Record<string, { name: string; completed: number; total: number }>,
     )
 
-    // Popula los datos
     tasks.forEach((task) => {
-      const dayName = dayjs(task.dueDate).format("ddd") // Obtiene abreviatura del día
+      const dayName = dayjs(task.dueDate).format("ddd") 
       if (groupedData[dayName]) {
         groupedData[dayName].total += 1
         if (task.status === "completed") {
@@ -56,7 +53,7 @@ export function Overview() {
       }
     })
 
-    return Object.values(groupedData) // Convierte de vuelta a array
+    return Object.values(groupedData) 
   }, [tasks])
 
   return (
