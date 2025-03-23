@@ -67,15 +67,11 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
   const totalPages = Math.ceil(filteredTasks.length / tasksPerPage)
   const paginatedTasks = filteredTasks.slice((currentPage - 1) * tasksPerPage, currentPage * tasksPerPage)
 
-  // Mantener la posición de desplazamiento cuando cambia la página
   const handlePageChange = (newPage: number) => {
-    // Guardar la posición actual de desplazamiento
     const scrollPosition = window.scrollY
 
-    // Cambiar la página
     setCurrentPage(newPage)
 
-    // Restaurar la posición de desplazamiento después de que se actualice el DOM
     setTimeout(() => {
       window.scrollTo(0, scrollPosition)
     }, 0)

@@ -34,7 +34,6 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const router = useRouter()
   const { addTask } = useTaskContext()
 
-  // Inicializar con null y establecer la fecha en un efecto
   const [date, setDate] = useState<Date | null>(null)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [title, setTitle] = useState("")
@@ -42,14 +41,12 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const [assignee, setAssignee] = useState("")
   const [recurring, setRecurring] = useState("")
 
-  // Establecer la fecha inicial solo cuando se abre el modal
   useEffect(() => {
     if (open) {
       setDate(new Date())
     }
   }, [open])
 
-  // Resetear el formulario cuando se cierra el modal
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
@@ -58,7 +55,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
         setAssignee("")
         setRecurring("")
         setDate(null)
-      }, 300) // Pequeño retraso para que la animación de cierre termine
+      }, 300) 
     }
   }, [open])
 
