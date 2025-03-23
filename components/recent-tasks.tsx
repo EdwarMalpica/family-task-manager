@@ -257,7 +257,7 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
                   </TableCell>
                   <TableCell className="flex justify-center">
                     <Trash2
-                      className="h-4 w-4 cursor-pointer hover:opacity-50 delay-200 ease-in-out mt-5"
+                      className="h-4 w-4 cursor-pointer hover:opacity-50 delay-200 ease-in-out mt-5 md:mt-0"
                       onClick={() =>
                         showDialog({
                           title: "Delete Task?",
