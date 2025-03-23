@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
-import { createContext, useContext, useState, ReactNode, useRef } from "react";
+import { createContext, useContext, useState, type ReactNode, useRef } from "react"
 
 type Task = {
-  id: string;
-  title: string;
-  assignee: string;
-  dueDate: string;
-  status: "pending" | "completed";
-  recurring: "daily" | "weekly" | "biweekly";
-};
+  id: string
+  title: string
+  assignee: string
+  dueDate: string
+  status: "pending" | "completed"
+  recurring: "daily" | "weekly" | "biweekly"
+}
 
 // type AnalyticsData = {
 //   name: string;
@@ -18,15 +18,15 @@ type Task = {
 // };
 
 type TaskContextType = {
-  tasks: Task[];
+  tasks: Task[]
   // analytics: AnalyticsData[];
-  addTask: (task: Task) => void;
-  updateTask: (id: string, updatedTask: Partial<Task>) => void;
-  deleteTask: (id: string) => void;
-  restoreTask: () => void;
-};
+  addTask: (task: Task) => void
+  updateTask: (id: string, updatedTask: Partial<Task>) => void
+  deleteTask: (id: string) => void
+  restoreTask: () => void
+}
 
-const TaskContext = createContext<TaskContextType | undefined>(undefined);
+const TaskContext = createContext<TaskContextType | undefined>(undefined)
 
 const initialTasks: Task[] = [
   {
@@ -77,7 +77,7 @@ const initialTasks: Task[] = [
     status: "completed",
     recurring: "weekly",
   },
-];
+]
 
 // const initialAnalytics: AnalyticsData[] = [
 //   { name: "Mon", completed: 4, total: 6 },
@@ -90,50 +90,45 @@ const initialTasks: Task[] = [
 // ];
 
 type TaskProviderProps = {
-  children: ReactNode;
-};
+  children: ReactNode
+}
 
 export function TaskProvider({ children }: TaskProviderProps) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks)
   // const [analytics] = useState<AnalyticsData[]>(initialAnalytics);
 
-  const addTask = (task: Task) => setTasks((prevTasks) => [...prevTasks, task]);
+  const addTask = (task: Task) => setTasks((prevTasks) => [...prevTasks, task])
 
   const updateTask = (id: string, updatedTask: Partial<Task>) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, ...updatedTask } : task
-      )
-    );
-  };
+    setTasks((prevTasks) => prevTasks.map((task) => (task.id === id ? { ...task, ...updatedTask } : task)))
+  }
 
-  const lastDeletedTask = useRef<Task | null>(null);
+  const lastDeletedTask = useRef<Task | null>(null)
 
   const deleteTask = (taskId: string) => {
-    lastDeletedTask.current = tasks.find((task) => task.id === taskId) || null;
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-  };
+    lastDeletedTask.current = tasks.find((task) => task.id === taskId) || null
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId))
+  }
 
   const restoreTask = () => {
     if (lastDeletedTask.current) {
-      setTasks((prevTasks) => [...prevTasks, lastDeletedTask.current!]);
-      lastDeletedTask.current = null;
+      setTasks((prevTasks) => [...prevTasks, lastDeletedTask.current!])
+      lastDeletedTask.current = null
     }
-  };
+  }
 
   return (
-    <TaskContext.Provider
-      value={{ tasks, addTask, updateTask, deleteTask, restoreTask }}
-    >
+    <TaskContext.Provider value={{ tasks, addTask, updateTask, deleteTask, restoreTask }}>
       {children}
     </TaskContext.Provider>
-  );
+  )
 }
 
 export function useTaskContext() {
-  const context = useContext(TaskContext);
+  const context = useContext(TaskContext)
   if (!context) {
-    throw new Error("useTaskContext must be used within a TaskProvider");
+    throw new Error("useTaskContext must be used within a TaskProvider")
   }
-  return context;
+  return context
 }
+

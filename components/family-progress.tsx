@@ -1,30 +1,23 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from "recharts";
-import { useTaskContext } from "@/contexts/TaskContext"; 
+import { useEffect, useState } from "react"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import { useTaskContext } from "@/contexts/TaskContext"
 
 const CustomPieTooltip = ({ active, payload }: any) => {
-  const [isMdScreen, setIsMdScreen] = useState(false);
+  const [isMdScreen, setIsMdScreen] = useState(false)
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMdScreen(window.innerWidth >= 768);
-    };
+      setIsMdScreen(window.innerWidth >= 768)
+    }
 
-    checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
-    return () => window.removeEventListener("resize", checkScreenSize);
-  }, []);
+    checkScreenSize()
+    window.addEventListener("resize", checkScreenSize)
+    return () => window.removeEventListener("resize", checkScreenSize)
+  }, [])
 
-  if (!active || !payload || payload.length === 0) return null;
+  if (!active || !payload || payload.length === 0) return null
 
   return (
     <div
@@ -37,42 +30,29 @@ const CustomPieTooltip = ({ active, payload }: any) => {
         pointerEvents: "none",
       }}
     >
-      <p className="whitespace-nowrap text-sm font-semibold">
-        {payload[0].payload.name}
-      </p>
+      <p className="whitespace-nowrap text-sm font-semibold">{payload[0].payload.name}</p>
       <p className="whitespace-nowrap text-xs">Tasks: {payload[0].value}</p>
     </div>
-  );
-};
+  )
+}
 
 export function FamilyProgress() {
-  const { tasks } = useTaskContext();
-  
+  const { tasks } = useTaskContext()
 
-  // const taskCounts = tasks.reduce((acc: Record<string, number>, task) => {
-  //   acc[task.assignee] = (acc[task.assignee] || 0) + 1;
-  //   return acc;
-  // }, {});
-
+  // Problema: Este código se ejecuta tanto en el servidor como en el cliente
   const taskCounts = tasks.reduce((acc: Record<string, number>, task) => {
-    if (task.status === "completed") { // Only count completed tasks
-      acc[task.assignee] = (acc[task.assignee] || 0) + 1;
+    if (task.status === "completed") {
+      // Solo cuenta tareas completadas
+      acc[task.assignee] = (acc[task.assignee] || 0) + 1
     }
-    return acc;
-  }, {});
+    return acc
+  }, {})
 
   const data = Object.keys(taskCounts).map((name) => ({
     name,
     value: taskCounts[name],
-    color:
-      name === "Mom"
-        ? "#8884d8"
-        : name === "Dad"
-        ? "#82ca9d"
-        : name === "Emma"
-        ? "#ffc658"
-        : "#ff8042",
-  }));
+    color: name === "Mom" ? "#8884d8" : name === "Dad" ? "#82ca9d" : name === "Emma" ? "#ffc658" : "#ff8042",
+  }))
 
   return (
     <div className="relative h-[300px]">
@@ -88,5 +68,6 @@ export function FamilyProgress() {
         </PieChart>
       </ResponsiveContainer>
     </div>
-  );
+  )
 }
+

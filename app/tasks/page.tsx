@@ -1,29 +1,15 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { RecentTasks } from "@/components/recent-tasks";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { useState } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
+import { RecentTasks } from "@/components/recent-tasks"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function TasksPage() {
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("all")
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -45,9 +31,7 @@ export default function TasksPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">All Tasks</h1>
-                <p className="text-muted-foreground">
-                  View and manage all family tasks
-                </p>
+                <p className="text-muted-foreground">View and manage all family tasks</p>
               </div>
               <Button asChild>
                 <Link href="/tasks/new">Create New Task</Link>
@@ -73,5 +57,6 @@ export default function TasksPage() {
         </Card>
       </main>
     </div>
-  );
+  )
 }
+

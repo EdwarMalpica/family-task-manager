@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,6 +21,9 @@ import {
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTaskContext } from "@/contexts/TaskContext"
+import { toast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 interface CreateTaskModalProps {
   open: boolean
@@ -28,12 +31,64 @@ interface CreateTaskModalProps {
 }
 
 export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
-  const [date, setDate] = useState<Date>()
+  const router = useRouter()
+  const { addTask } = useTaskContext()
+
+  // Inicializar con null y establecer la fecha en un efecto
+  const [date, setDate] = useState<Date | null>(null)
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+  const [assignee, setAssignee] = useState("")
+  const [recurring, setRecurring] = useState("")
+
+  // Establecer la fecha inicial solo cuando se abre el modal
+  useEffect(() => {
+    if (open) {
+      setDate(new Date())
+    }
+  }, [open])
+
+  // Resetear el formulario cuando se cierra el modal
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        setTitle("")
+        setDescription("")
+        setAssignee("")
+        setRecurring("")
+        setDate(null)
+      }, 300) // Pequeño retraso para que la animación de cierre termine
+    }
+  }, [open])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would normally save the task to your database
+
+    if (!title || !assignee || !date || !recurring) {
+      toast({
+        title: "Missing Fields",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const newTask = {
+      id: crypto.randomUUID(),
+      title,
+      assignee,
+      dueDate: date.toISOString().split("T")[0],
+      status: "pending",
+      recurring,
+    }
+
+    addTask(newTask)
     onOpenChange(false)
+    toast({
+      title: "Task Created",
+      description: "The task was created successfully",
+    })
   }
 
   return (
@@ -47,30 +102,42 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="title">Task Title</Label>
-              <Input id="title" placeholder="Enter task title" required />
+              <Input
+                id="title"
+                placeholder="Enter task title"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" placeholder="Enter task description" className="min-h-[100px]" />
+              <Textarea
+                id="description"
+                placeholder="Enter task description"
+                className="min-h-[100px]"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="assignee">Assign To</Label>
-                <Select>
+                <Select onValueChange={setAssignee} value={assignee}>
                   <SelectTrigger id="assignee">
                     <SelectValue placeholder="Select family member" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="mom">Mom</SelectItem>
-                    <SelectItem value="dad">Dad</SelectItem>
-                    <SelectItem value="emma">Emma</SelectItem>
-                    <SelectItem value="jack">Jack</SelectItem>
+                    <SelectItem value="Mom">Mom</SelectItem>
+                    <SelectItem value="Dad">Dad</SelectItem>
+                    <SelectItem value="Emma">Emma</SelectItem>
+                    <SelectItem value="Jack">Jack</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Due Date</Label>
-                <Popover>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
@@ -81,14 +148,22 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                    <Calendar
+                      mode="single"
+                      selected={date || undefined}
+                      onSelect={(selectedDate) => {
+                        setDate(selectedDate)
+                        setIsCalendarOpen(false)
+                      }}
+                      initialFocus
+                    />
                   </PopoverContent>
                 </Popover>
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="recurring">Recurring</Label>
-              <Select>
+              <Select onValueChange={setRecurring} value={recurring}>
                 <SelectTrigger id="recurring">
                   <SelectValue placeholder="Select frequency" />
                 </SelectTrigger>
