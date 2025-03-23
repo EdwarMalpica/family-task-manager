@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <AlertDialogProvider>
           <TaskProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <ThemeProvider defaultTheme="system" storageKey="family-tasks-theme">
               {children}
               <Toaster />
               <GlobalAlertDialog />

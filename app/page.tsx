@@ -8,13 +8,40 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { useAlertDialog } from "@/contexts/AlertDialogContext"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { CreateTaskModal } from "@/components/create-task-modal"
+import { useTaskContext } from "@/contexts/TaskContext"
 
 export default function DashboardPage() {
   const { showDialog } = useAlertDialog()
   const [searchQuery, setSearchQuery] = useState("")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const { tasks } = useTaskContext()
+
+  // Calculate dashboard statistics
+  const stats = useMemo(() => {
+    const totalTasks = tasks.length
+    const completedTasks = tasks.filter((task) => task.status === "completed").length
+    const pendingTasks = totalTasks - completedTasks
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+
+    // For demonstration purposes, we'll calculate "from last week" values
+    // In a real app, you would compare with historical data
+    const changeFromLastWeek = {
+      total: "+2",
+      completed: "+4",
+      pending: "-2",
+      rate: "+5%",
+    }
+
+    return {
+      totalTasks,
+      completedTasks,
+      pendingTasks,
+      completionRate,
+      changeFromLastWeek,
+    }
+  }, [tasks])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -47,8 +74,8 @@ export default function DashboardPage() {
                 <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">24</div>
-                <p className="text-xs text-muted-foreground">+2 from last week</p>
+                <div className="text-2xl font-bold">{stats.totalTasks}</div>
+                <p className="text-xs text-muted-foreground">{stats.changeFromLastWeek.total} from last week</p>
               </CardContent>
             </Card>
             <Card>
@@ -56,8 +83,8 @@ export default function DashboardPage() {
                 <CardTitle className="text-sm font-medium">Completed Tasks</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">16</div>
-                <p className="text-xs text-muted-foreground">+4 from last week</p>
+                <div className="text-2xl font-bold">{stats.completedTasks}</div>
+                <p className="text-xs text-muted-foreground">{stats.changeFromLastWeek.completed} from last week</p>
               </CardContent>
             </Card>
             <Card>
@@ -65,8 +92,8 @@ export default function DashboardPage() {
                 <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">8</div>
-                <p className="text-xs text-muted-foreground">-2 from last week</p>
+                <div className="text-2xl font-bold">{stats.pendingTasks}</div>
+                <p className="text-xs text-muted-foreground">{stats.changeFromLastWeek.pending} from last week</p>
               </CardContent>
             </Card>
             <Card>
@@ -74,8 +101,8 @@ export default function DashboardPage() {
                 <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">67%</div>
-                <p className="text-xs text-muted-foreground">+5% from last week</p>
+                <div className="text-2xl font-bold">{stats.completionRate}%</div>
+                <p className="text-xs text-muted-foreground">{stats.changeFromLastWeek.rate} from last week</p>
               </CardContent>
             </Card>
           </div>

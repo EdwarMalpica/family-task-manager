@@ -18,12 +18,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTaskContext } from "@/contexts/TaskContext"
 import { toast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import { formatDate } from "@/lib/date-utils"
 
 interface CreateTaskModalProps {
   open: boolean
@@ -144,7 +144,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                       className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      {date ? formatDate(date) : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -152,8 +152,10 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                       mode="single"
                       selected={date || undefined}
                       onSelect={(selectedDate) => {
-                        setDate(selectedDate)
-                        setIsCalendarOpen(false)
+                        if (selectedDate) {
+                          setDate(selectedDate)
+                          setIsCalendarOpen(false)
+                        }
                       }}
                       initialFocus
                     />
