@@ -31,12 +31,11 @@ interface CreateTaskModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-// Define the form schema with zod
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   assignee: z.string().min(1, "Assignee is required"),
-  dueDate: z.date().optional(), // Hacemos que la fecha sea opcional para evitar problemas de validación
+  dueDate: z.date().optional(), 
   recurring: z.string().min(1, "Frequency is required"),
 })
 
@@ -47,7 +46,6 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const { addTask } = useTaskContext()
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
-  // Initialize the form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,18 +53,16 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
       description: "",
       assignee: "",
       recurring: "",
-      dueDate: new Date(), // Establecemos la fecha actual por defecto
+      dueDate: new Date(), 
     },
   })
 
-  // Set initial date when modal opens
   useEffect(() => {
     if (open) {
       form.setValue("dueDate", new Date())
     }
   }, [open, form])
 
-  // Reset form when modal closes
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
@@ -77,7 +73,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
           recurring: "",
           dueDate: undefined,
         })
-      }, 300) // Small delay for closing animation to finish
+      }, 300) 
     }
   }, [open, form])
 

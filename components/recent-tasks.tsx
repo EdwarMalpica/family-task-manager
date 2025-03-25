@@ -31,26 +31,21 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
   const { showDialog } = useAlertDialog()
   const tableRef = useRef<HTMLDivElement>(null)
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const tasksPerPage = 5
 
-  // Filter state
   const [statusFilter, setStatusFilter] = useState<string[]>([])
   const [assigneeFilter, setAssigneeFilter] = useState<string[]>([])
   const [recurringFilter, setRecurringFilter] = useState<string[]>([])
 
-  // Sorting state
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: "",
     direction: null,
   })
 
-  // Get unique values for filters
   const uniqueAssignees = [...new Set(tasks.map((task) => task.assignee))]
   const uniqueRecurring = [...new Set(tasks.map((task) => task.recurring))]
 
-  // Sort function
   const sortedTasks = [...tasks].sort((a, b) => {
     if (!sortConfig.key || sortConfig.direction === null) return 0
 
@@ -70,7 +65,6 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
     return 0
   })
 
-  // Request sort function
   const requestSort = (key: string) => {
     let direction: "asc" | "desc" | null = "asc"
 
@@ -85,7 +79,6 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
     setSortConfig({ key, direction })
   }
 
-  // Get sort direction icon
   const getSortDirectionIcon = (key: string) => {
     if (sortConfig.key !== key) {
       return <ArrowUpDown className="h-4 w-4 ml-1" />
@@ -102,43 +95,32 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
     return <ArrowUpDown className="h-4 w-4 ml-1" />
   }
 
-  // Filter tasks
   const filteredTasks = sortedTasks.filter((task) => {
-    // Search filter
     const matchesSearch =
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.assignee.toLowerCase().includes(searchQuery.toLowerCase())
 
-    // Status filter
     const matchesStatus = statusFilter.length === 0 || statusFilter.includes(task.status)
 
-    // Assignee filter
     const matchesAssignee = assigneeFilter.length === 0 || assigneeFilter.includes(task.assignee)
 
-    // Recurring filter
     const matchesRecurring = recurringFilter.length === 0 || recurringFilter.includes(task.recurring)
 
     return matchesSearch && matchesStatus && matchesAssignee && matchesRecurring
   })
 
-  // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1)
   }, [searchQuery, statusFilter, assigneeFilter, recurringFilter])
 
-  // Calculate paginated tasks
   const totalPages = Math.ceil(filteredTasks.length / tasksPerPage)
   const paginatedTasks = filteredTasks.slice((currentPage - 1) * tasksPerPage, currentPage * tasksPerPage)
 
-  // Maintain scroll position when page changes
   const handlePageChange = (newPage: number) => {
-    // Save current scroll position
     const scrollPosition = window.scrollY
 
-    // Change page
     setCurrentPage(newPage)
 
-    // Restore scroll position after DOM update
     setTimeout(() => {
       window.scrollTo(0, scrollPosition)
     }, 0)
@@ -163,7 +145,6 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
       duration: 5000,
       onAutoClose: () => {
         if (!undo) {
-          // Final deletion logic if needed
         }
       },
     })
