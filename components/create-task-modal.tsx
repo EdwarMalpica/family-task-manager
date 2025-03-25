@@ -1,18 +1,22 @@
-"use client"
-import { useState, useEffect } from "react"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
-import { CalendarIcon } from "lucide-react"
-import { useTaskContext } from "@/contexts/TaskContext"
-import { formatDate } from "@/lib/date-utils"
-import { cn } from "@/lib/utils"
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+"use client";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { CalendarIcon } from "lucide-react";
+import { useTaskContext } from "@/contexts/task-context";
+import { formatDate } from "@/lib/date-utils";
+import { cn } from "@/lib/utils";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -20,31 +24,44 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CreateTaskModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   assignee: z.string().min(1, "Assignee is required"),
-  dueDate: z.date().optional(), 
+  dueDate: z.date().optional(),
   recurring: z.string().min(1, "Frequency is required"),
-})
+});
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
 export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
-  const router = useRouter()
-  const { addTask } = useTaskContext()
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const router = useRouter();
+  const { addTask } = useTaskContext();
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -53,15 +70,15 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
       description: "",
       assignee: "",
       recurring: "",
-      dueDate: new Date(), 
+      dueDate: new Date(),
     },
-  })
+  });
 
   useEffect(() => {
     if (open) {
-      form.setValue("dueDate", new Date())
+      form.setValue("dueDate", new Date());
     }
-  }, [open, form])
+  }, [open, form]);
 
   useEffect(() => {
     if (!open) {
@@ -72,13 +89,13 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
           assignee: "",
           recurring: "",
           dueDate: undefined,
-        })
-      }, 300) 
+        });
+      }, 300);
     }
-  }, [open, form])
+  }, [open, form]);
 
   const onSubmit = (values: FormValues) => {
-    const dueDate = values.dueDate || new Date()
+    const dueDate = values.dueDate || new Date();
 
     const newTask = {
       id: crypto.randomUUID(),
@@ -88,25 +105,30 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
       dueDate: dueDate.toISOString().split("T")[0],
       createdAt: new Date(),
       recurring: values.recurring,
-    }
+    };
 
-    addTask(newTask)
-    onOpenChange(false)
+    addTask(newTask);
+    onOpenChange(false);
     toast.success("Task Created", {
       description: "The task was created successfully",
-    })
-  }
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-w-[calc(100%-2rem)] mx-auto my-4 rounded-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
-          <DialogDescription>Add a new task for your family members</DialogDescription>
+          <DialogDescription>
+            Add a new task for your family members
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 py-4"
+          >
             <FormField
               control={form.control}
               name="title"
@@ -130,7 +152,11 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Enter task description" className="min-h-[100px]" {...field} />
+                    <Textarea
+                      placeholder="Enter task description"
+                      className="min-h-[100px]"
+                      {...field}
+                    />
                   </FormControl>
                   <div className="h-5">
                     <FormMessage />
@@ -146,7 +172,10 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Assign To</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger className="h-10">
                           <SelectValue placeholder="Select family member" />
@@ -172,18 +201,25 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Due Date</FormLabel>
-                    <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                    <Popover
+                      open={isCalendarOpen}
+                      onOpenChange={setIsCalendarOpen}
+                    >
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant={"outline"}
                             className={cn(
                               "w-full justify-start text-left font-normal h-10",
-                              !field.value && "text-muted-foreground",
+                              !field.value && "text-muted-foreground"
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? formatDate(field.value) : <span>Pick a date</span>}
+                            {field.value ? (
+                              formatDate(field.value)
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -192,8 +228,8 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                           mode="single"
                           selected={field.value || undefined}
                           onSelect={(date) => {
-                            field.onChange(date)
-                            setIsCalendarOpen(false)
+                            field.onChange(date);
+                            setIsCalendarOpen(false);
                           }}
                           initialFocus
                         />
@@ -213,7 +249,10 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Recurring</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger className="h-10">
                         <SelectValue placeholder="Select frequency" />
@@ -251,6 +290,5 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

@@ -1,23 +1,23 @@
-import type React from "react"
-import "@/app/globals.css"
-import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/sonner"
-import { AlertDialogProvider } from "@/contexts/AlertDialogContext"
-import { GlobalAlertDialog } from "@/components/GlobalAlertDialog"
-import { TaskProvider } from "@/contexts/TaskContext"
+import type React from "react";
+import "@/app/globals.css";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+import { AlertDialogProvider } from "@/contexts/alert-dialog-context";
+import { GlobalAlertDialog } from "@/components/global-alert-dialog";
+import { TaskProvider } from "@/contexts/task-context";
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Family Task Manager",
   description: "Manage your family's tasks and track progress",
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -33,5 +33,5 @@ export default function RootLayout({
         </AlertDialogProvider>
       </body>
     </html>
-  )
+  );
 }
