@@ -2,7 +2,7 @@ import type React from "react"
 import "@/app/globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/sonner"
 import { AlertDialogProvider } from "@/contexts/AlertDialogContext"
 import { GlobalAlertDialog } from "@/components/GlobalAlertDialog"
 import { TaskProvider } from "@/contexts/TaskContext"
@@ -12,7 +12,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Family Task Manager",
   description: "Manage your family's tasks and track progress",
-  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -36,7 +35,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'

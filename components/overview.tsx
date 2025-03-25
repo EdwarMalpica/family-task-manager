@@ -44,7 +44,7 @@ export function Overview() {
     )
 
     tasks.forEach((task) => {
-      const dayName = dayjs(task.dueDate).format("ddd") 
+      const dayName = dayjs(task.dueDate).format("ddd")
       if (groupedData[dayName]) {
         groupedData[dayName].total += 1
         if (task.status === "completed") {
@@ -53,7 +53,7 @@ export function Overview() {
       }
     })
 
-    return Object.values(groupedData) 
+    return Object.values(groupedData)
   }, [tasks])
 
   return (

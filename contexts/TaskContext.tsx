@@ -20,6 +20,11 @@ type TaskStats = {
   byAssignee: Record<string, { total: number; completed: number }>
 }
 
+type DeletedTaskInfo = {
+  task: Task
+  index: number
+}
+
 type TaskContextType = {
   tasks: Task[]
   stats: TaskStats
@@ -145,17 +150,37 @@ export function TaskProvider({ children }: TaskProviderProps) {
     setTasks((prevTasks) => prevTasks.map((task) => (task.id === id ? { ...task, ...updatedTask } : task)))
   }
 
-  const lastDeletedTask = useRef<Task | null>(null)
+  const lastDeletedTaskInfo = useRef<DeletedTaskInfo | null>(null)
 
   const deleteTask = (taskId: string) => {
-    lastDeletedTask.current = tasks.find((task) => task.id === taskId) || null
+    const taskIndex = tasks.findIndex((task) => task.id === taskId)
+    if (taskIndex === -1) return
+
+    lastDeletedTaskInfo.current = {
+      task: tasks[taskIndex],
+      index: taskIndex,
+    }
+
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId))
   }
 
   const restoreTask = () => {
-    if (lastDeletedTask.current) {
-      setTasks((prevTasks) => [...prevTasks, lastDeletedTask.current!])
-      lastDeletedTask.current = null
+    if (lastDeletedTaskInfo.current) {
+      const { task, index } = lastDeletedTaskInfo.current
+
+      setTasks((prevTasks) => {
+        const newTasks = [...prevTasks]
+
+        if (index > newTasks.length) {
+          newTasks.push(task)
+        } else {
+          newTasks.splice(index, 0, task)
+        }
+
+        return newTasks
+      })
+
+      lastDeletedTaskInfo.current = null
     }
   }
 

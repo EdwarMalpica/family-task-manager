@@ -6,42 +6,27 @@ import { useTaskContext } from "@/contexts/TaskContext"
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088fe", "#00C49F"]
 
-const CustomPieTooltip = ({ active, payload }: any) => {
-  const [isMdScreen, setIsMdScreen] = useState(false)
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMdScreen(window.innerWidth >= 768)
-    }
-
-    checkScreenSize()
-    window.addEventListener("resize", checkScreenSize)
-    return () => window.removeEventListener("resize", checkScreenSize)
-  }, [])
-
+const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload || payload.length === 0) return null
 
   return (
-    <div
-      className="bg-white dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 rounded-md p-2 shadow-md"
-      style={{
-        position: "absolute",
-        left: "50%",
-        top: "20px",
-        transform: isMdScreen ? "translate(400%, 200%)" : "translate(-50%, 0)",
-        pointerEvents: "none",
-      }}
-    >
-      <p className="whitespace-nowrap text-sm font-semibold">{payload[0].name}</p>
-      <p className="whitespace-nowrap text-xs">Tasks: {payload[0].value}</p>
+    <div className="bg-background border border-border rounded-md p-2 shadow-md">
+      <p className="font-semibold">{payload[0].name}</p>
+      <p className="text-sm">
+        Completed Tasks: <span className="font-medium">{payload[0].value}</span>
+      </p>
     </div>
   )
 }
 
 export function FamilyProgress() {
   const { tasks } = useTaskContext()
+  const [isMounted, setIsMounted] = useState(false)
 
-  // Only count completed tasks by member
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const taskCounts = tasks.reduce((acc: Record<string, number>, task) => {
     if (task.status === "completed") {
       acc[task.assignee] = (acc[task.assignee] || 0) + 1
@@ -49,16 +34,14 @@ export function FamilyProgress() {
     return acc
   }, {})
 
-  // Convert to chart format and remove members with no completed tasks
   const data = Object.keys(taskCounts)
-    .filter((name) => taskCounts[name] > 0) // Only include members with completed tasks
+    .filter((name) => taskCounts[name] > 0) 
     .map((name, index) => ({
       name,
       value: taskCounts[name],
       color: COLORS[index % COLORS.length],
     }))
 
-  // If no data, show a message
   if (data.length === 0) {
     return <div className="flex justify-center items-center h-[300px]">No completed tasks</div>
   }
@@ -78,13 +61,13 @@ export function FamilyProgress() {
             animationBegin={0}
             animationDuration={1000}
             animationEasing="ease-out"
-            isAnimationActive={true}
+            isAnimationActive={isMounted}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip content={<CustomPieTooltip />} />
+          <Tooltip content={<CustomTooltip />} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>

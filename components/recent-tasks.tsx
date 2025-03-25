@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { CheckCircle2, Clock, Trash2, Filter } from "lucide-react"
+import { CheckCircle2, Clock, Trash2, Filter, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useAlertDialog } from "@/contexts/AlertDialogContext"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { useTaskContext } from "@/contexts/TaskContext"
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination"
 import {
@@ -19,6 +19,11 @@ import {
 
 interface RecentTasksProps {
   searchQuery?: string
+}
+
+type SortConfig = {
+  key: string
+  direction: "asc" | "desc" | null
 }
 
 export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
@@ -35,12 +40,70 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
   const [assigneeFilter, setAssigneeFilter] = useState<string[]>([])
   const [recurringFilter, setRecurringFilter] = useState<string[]>([])
 
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    key: "",
+    direction: null,
+  })
+
   // Get unique values for filters
   const uniqueAssignees = [...new Set(tasks.map((task) => task.assignee))]
   const uniqueRecurring = [...new Set(tasks.map((task) => task.recurring))]
 
+  // Sort function
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (!sortConfig.key || sortConfig.direction === null) return 0
+
+    const aValue = a[sortConfig.key as keyof typeof a]
+    const bValue = b[sortConfig.key as keyof typeof b]
+
+    if (sortConfig.key === "dueDate") {
+      return sortConfig.direction === "asc"
+        ? new Date(aValue as string).getTime() - new Date(bValue as string).getTime()
+        : new Date(bValue as string).getTime() - new Date(aValue as string).getTime()
+    }
+
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortConfig.direction === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
+    }
+
+    return 0
+  })
+
+  // Request sort function
+  const requestSort = (key: string) => {
+    let direction: "asc" | "desc" | null = "asc"
+
+    if (sortConfig.key === key) {
+      if (sortConfig.direction === "asc") {
+        direction = "desc"
+      } else if (sortConfig.direction === "desc") {
+        direction = null
+      }
+    }
+
+    setSortConfig({ key, direction })
+  }
+
+  // Get sort direction icon
+  const getSortDirectionIcon = (key: string) => {
+    if (sortConfig.key !== key) {
+      return <ArrowUpDown className="h-4 w-4 ml-1" />
+    }
+
+    if (sortConfig.direction === "asc") {
+      return <ArrowUp className="h-4 w-4 ml-1" />
+    }
+
+    if (sortConfig.direction === "desc") {
+      return <ArrowDown className="h-4 w-4 ml-1" />
+    }
+
+    return <ArrowUpDown className="h-4 w-4 ml-1" />
+  }
+
   // Filter tasks
-  const filteredTasks = tasks.filter((task) => {
+  const filteredTasks = sortedTasks.filter((task) => {
     // Search filter
     const matchesSearch =
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -88,29 +151,22 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
 
     deleteTask(taskId)
 
-    const toastInstance = toast({
-      title: "Task Deleted",
+    toast("Task Deleted", {
       description: "The task has been deleted",
-      action: (
-        <Button
-          variant="default"
-          size="sm"
-          onClick={() => {
-            undo = true
-            restoreTask()
-            toastInstance.dismiss()
-          }}
-        >
-          Undo
-        </Button>
-      ),
+      action: {
+        label: "Undo",
+        onClick: () => {
+          undo = true
+          restoreTask()
+        },
+      },
+      duration: 5000,
+      onAutoClose: () => {
+        if (!undo) {
+          // Final deletion logic if needed
+        }
+      },
     })
-
-    setTimeout(() => {
-      if (!undo) {
-        // Final deletion logic if needed
-      }
-    }, 5000)
   }
 
   const toggleTaskStatus = (id: string) => {
@@ -223,11 +279,21 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]"></TableHead>
-              <TableHead>Task</TableHead>
-              <TableHead>Assignee</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Recurring</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("title")}>
+                <div className="flex items-center">Task {getSortDirectionIcon("title")}</div>
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("assignee")}>
+                <div className="flex items-center">Assignee {getSortDirectionIcon("assignee")}</div>
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("dueDate")}>
+                <div className="flex items-center">Due Date {getSortDirectionIcon("dueDate")}</div>
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("recurring")}>
+                <div className="flex items-center">Recurring {getSortDirectionIcon("recurring")}</div>
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("status")}>
+                <div className="flex items-center">Status {getSortDirectionIcon("status")}</div>
+              </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>

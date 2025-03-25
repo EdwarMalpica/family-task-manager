@@ -1,13 +1,16 @@
 "use client"
-
-import type React from "react"
-
 import { useState, useEffect } from "react"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { CalendarIcon } from "lucide-react"
+import { useTaskContext } from "@/contexts/TaskContext"
+import { formatDate } from "@/lib/date-utils"
+import { cn } from "@/lib/utils"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
@@ -18,75 +21,82 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useTaskContext } from "@/contexts/TaskContext"
-import { toast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import { formatDate } from "@/lib/date-utils"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface CreateTaskModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
+// Define the form schema with zod
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  assignee: z.string().min(1, "Assignee is required"),
+  dueDate: z.date().optional(), // Hacemos que la fecha sea opcional para evitar problemas de validación
+  recurring: z.string().min(1, "Frequency is required"),
+})
+
+type FormValues = z.infer<typeof formSchema>
+
 export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const router = useRouter()
   const { addTask } = useTaskContext()
-
-  // Initialize with null and set date in effect
-  const [date, setDate] = useState<Date | null>(null)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [assignee, setAssignee] = useState("")
-  const [recurring, setRecurring] = useState("")
 
-  // Set initial date only when modal opens
+  // Initialize the form
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      assignee: "",
+      recurring: "",
+      dueDate: new Date(), // Establecemos la fecha actual por defecto
+    },
+  })
+
+  // Set initial date when modal opens
   useEffect(() => {
     if (open) {
-      setDate(new Date())
+      form.setValue("dueDate", new Date())
     }
-  }, [open])
+  }, [open, form])
 
   // Reset form when modal closes
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
-        setTitle("")
-        setDescription("")
-        setAssignee("")
-        setRecurring("")
-        setDate(null)
+        form.reset({
+          title: "",
+          description: "",
+          assignee: "",
+          recurring: "",
+          dueDate: undefined,
+        })
       }, 300) // Small delay for closing animation to finish
     }
-  }, [open])
+  }, [open, form])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!title || !assignee || !date || !recurring) {
-      toast({
-        title: "Missing Fields",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      })
-      return
-    }
+  const onSubmit = (values: FormValues) => {
+    const dueDate = values.dueDate || new Date()
 
     const newTask = {
       id: crypto.randomUUID(),
-      title,
-      assignee,
-      dueDate: date.toISOString().split("T")[0],
-      status: "pending",
-      recurring,
+      title: values.title,
+      assignee: values.assignee,
+      status: "pending" as const,
+      dueDate: dueDate.toISOString().split("T")[0],
+      createdAt: new Date(),
+      recurring: values.recurring,
     }
 
     addTask(newTask)
     onOpenChange(false)
-    toast({
-      title: "Task Created",
+    toast.success("Task Created", {
       description: "The task was created successfully",
     })
   }
@@ -94,100 +104,155 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-w-[calc(100%-2rem)] mx-auto my-4 rounded-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Create New Task</DialogTitle>
-            <DialogDescription>Add a new task for your family members</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Task Title</Label>
-              <Input
-                id="title"
-                placeholder="Enter task title"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Enter task description"
-                className="min-h-[100px]"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
+        <DialogHeader>
+          <DialogTitle>Create New Task</DialogTitle>
+          <DialogDescription>Add a new task for your family members</DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Task Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter task title" {...field} />
+                  </FormControl>
+                  <div className="h-5">
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter task description" className="min-h-[100px]" {...field} />
+                  </FormControl>
+                  <div className="h-5">
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="assignee">Assign To</Label>
-                <Select onValueChange={setAssignee} value={assignee}>
-                  <SelectTrigger id="assignee">
-                    <SelectValue placeholder="Select family member" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Mom">Mom</SelectItem>
-                    <SelectItem value="Dad">Dad</SelectItem>
-                    <SelectItem value="Emma">Emma</SelectItem>
-                    <SelectItem value="Jack">Jack</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Due Date</Label>
-                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? formatDate(date) : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={date || undefined}
-                      onSelect={(selectedDate) => {
-                        if (selectedDate) {
-                          setDate(selectedDate)
-                          setIsCalendarOpen(false)
-                        }
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <FormField
+                control={form.control}
+                name="assignee"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Assign To</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-10">
+                          <SelectValue placeholder="Select family member" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Mom">Mom</SelectItem>
+                        <SelectItem value="Dad">Dad</SelectItem>
+                        <SelectItem value="Emma">Emma</SelectItem>
+                        <SelectItem value="Jack">Jack</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="h-5">
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Due Date</FormLabel>
+                    <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal h-10",
+                              !field.value && "text-muted-foreground",
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? formatDate(field.value) : <span>Pick a date</span>}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={field.value || undefined}
+                          onSelect={(date) => {
+                            field.onChange(date)
+                            setIsCalendarOpen(false)
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <div className="h-5">
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="recurring">Recurring</Label>
-              <Select onValueChange={setRecurring} value={recurring}>
-                <SelectTrigger id="recurring">
-                  <SelectValue placeholder="Select frequency" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="biweekly">Bi-weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
-            <Button variant="outline" type="button" onClick={() => onOpenChange(false)} className="sm:order-1 order-2">
-              Cancel
-            </Button>
-            <Button type="submit" className="sm:order-2 order-1">
-              Create Task
-            </Button>
-          </DialogFooter>
-        </form>
+
+            <FormField
+              control={form.control}
+              name="recurring"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Recurring</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="h-5">
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="sm:order-1 order-2"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="sm:order-2 order-1">
+                Create Task
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

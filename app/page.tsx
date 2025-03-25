@@ -18,15 +18,12 @@ export default function DashboardPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const { tasks } = useTaskContext()
 
-  // Calculate dashboard statistics
   const stats = useMemo(() => {
     const totalTasks = tasks.length
     const completedTasks = tasks.filter((task) => task.status === "completed").length
     const pendingTasks = totalTasks - completedTasks
     const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
-    // For demonstration purposes, we'll calculate "from last week" values
-    // In a real app, you would compare with historical data
     const changeFromLastWeek = {
       total: "+2",
       completed: "+4",
