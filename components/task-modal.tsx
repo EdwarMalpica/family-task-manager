@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { useRouter } from "next/navigation"
 import { CalendarIcon } from "lucide-react"
 import { useTaskContext } from "@/contexts/task-context"
 import { formatDate } from "@/lib/date-utils"
@@ -26,9 +25,19 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-interface CreateTaskModalProps {
+interface TaskModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  task?: {
+    id: string
+    title: string
+    assignee: string
+    dueDate: string
+    status: "pending" | "completed"
+    recurring: string
+    description?: string
+  }
+  mode: "create" | "edit"
 }
 
 const formSchema = z.object({
@@ -41,9 +50,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
-  const router = useRouter()
-  const { addTask } = useTaskContext()
+export function TaskModal({ open, onOpenChange, task, mode }: TaskModalProps) {
+  const { addTask, updateTask } = useTaskContext()
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   const form = useForm<FormValues>({
@@ -57,12 +65,20 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
     },
   })
 
+  // Cargar datos de la tarea si estamos en modo edición
   useEffect(() => {
-    if (open) {
+    if (open && mode === "edit" && task) {
+      form.setValue("title", task.title)
+      form.setValue("description", task.description || "")
+      form.setValue("assignee", task.assignee)
+      form.setValue("recurring", task.recurring)
+      form.setValue("dueDate", new Date(task.dueDate))
+    } else if (open && mode === "create") {
       form.setValue("dueDate", new Date())
     }
-  }, [open, form])
+  }, [open, form, task, mode])
 
+  // Limpiar el formulario al cerrar
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
@@ -80,29 +96,48 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
   const onSubmit = (values: FormValues) => {
     const dueDate = values.dueDate || new Date()
 
-    const newTask = {
-      id: crypto.randomUUID(),
-      title: values.title,
-      assignee: values.assignee,
-      status: "pending" as const,
-      dueDate: dueDate.toISOString().split("T")[0],
-      createdAt: new Date(),
-      recurring: values.recurring,
+    if (mode === "create") {
+      const newTask = {
+        id: crypto.randomUUID(),
+        title: values.title,
+        assignee: values.assignee,
+        status: "pending" as const,
+        dueDate: dueDate.toISOString().split("T")[0],
+        createdAt: new Date(),
+        recurring: values.recurring,
+        description: values.description,
+      }
+
+      addTask(newTask)
+      toast.success("Task Created", {
+        description: "The task was created successfully",
+      })
+    } else if (mode === "edit" && task) {
+      updateTask(task.id, {
+        title: values.title,
+        assignee: values.assignee,
+        dueDate: dueDate.toISOString().split("T")[0],
+        recurring: values.recurring,
+        description: values.description,
+      })
+      toast.success("Task Updated", {
+        description: "The task was updated successfully",
+      })
     }
 
-    addTask(newTask)
     onOpenChange(false)
-    toast.success("Task Created", {
-      description: "The task was created successfully",
-    })
   }
+
+  const title = mode === "create" ? "Create New Task" : "Edit Task"
+  const description = mode === "create" ? "Add a new task for your family members" : "Edit task details"
+  const submitButtonText = mode === "create" ? "Create Task" : "Save Changes"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-w-[calc(100%-2rem)] mx-auto my-4 rounded-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
-          <DialogDescription>Add a new task for your family members</DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -146,7 +181,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Assign To</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="h-10">
                           <SelectValue placeholder="Select family member" />
@@ -213,7 +248,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Recurring</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="h-10">
                         <SelectValue placeholder="Select frequency" />
@@ -244,7 +279,7 @@ export function CreateTaskModal({ open, onOpenChange }: CreateTaskModalProps) {
                 Cancel
               </Button>
               <Button type="submit" className="sm:order-2 order-1">
-                Create Task
+                {submitButtonText}
               </Button>
             </DialogFooter>
           </form>

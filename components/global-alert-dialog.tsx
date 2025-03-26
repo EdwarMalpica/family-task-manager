@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,13 +8,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useAlertDialog } from "@/contexts/alert-dialog-context";
+} from "@/components/ui/alert-dialog"
+import { useAlertDialog } from "@/contexts/alert-dialog-context"
 
 export function GlobalAlertDialog() {
-  const { isOpen, hideDialog, options } = useAlertDialog();
+  const { isOpen, hideDialog, options } = useAlertDialog()
 
-  if (!options) return null;
+  if (!options) return null
 
   return (
     <AlertDialog open={isOpen} onOpenChange={hideDialog}>
@@ -27,8 +27,8 @@ export function GlobalAlertDialog() {
           <AlertDialogCancel onClick={hideDialog}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
-              options.onConfirm();
-              hideDialog();
+              options.onConfirm()
+              hideDialog()
             }}
           >
             Yes
@@ -36,5 +36,6 @@ export function GlobalAlertDialog() {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
+  )
 }
+

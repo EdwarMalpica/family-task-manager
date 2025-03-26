@@ -1,27 +1,13 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from "recharts";
-import { useTaskContext } from "@/contexts/task-context";
+import { useEffect, useState } from "react"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import { useTaskContext } from "@/contexts/task-context"
 
-const COLORS = [
-  "#8884d8",
-  "#82ca9d",
-  "#ffc658",
-  "#ff8042",
-  "#0088fe",
-  "#00C49F",
-];
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088fe", "#00C49F"]
 
 const CustomTooltip = ({ active, payload }: any) => {
-  if (!active || !payload || payload.length === 0) return null;
+  if (!active || !payload || payload.length === 0) return null
 
   return (
     <div className="bg-background border border-border rounded-md p-2 shadow-md">
@@ -30,23 +16,23 @@ const CustomTooltip = ({ active, payload }: any) => {
         Completed Tasks: <span className="font-medium">{payload[0].value}</span>
       </p>
     </div>
-  );
-};
+  )
+}
 
 export function FamilyProgress() {
-  const { tasks } = useTaskContext();
-  const [isMounted, setIsMounted] = useState(false);
+  const { tasks } = useTaskContext()
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMounted(true)
+  }, [])
 
   const taskCounts = tasks.reduce((acc: Record<string, number>, task) => {
     if (task.status === "completed") {
-      acc[task.assignee] = (acc[task.assignee] || 0) + 1;
+      acc[task.assignee] = (acc[task.assignee] || 0) + 1
     }
-    return acc;
-  }, {});
+    return acc
+  }, {})
 
   const data = Object.keys(taskCounts)
     .filter((name) => taskCounts[name] > 0)
@@ -54,14 +40,10 @@ export function FamilyProgress() {
       name,
       value: taskCounts[name],
       color: COLORS[index % COLORS.length],
-    }));
+    }))
 
   if (data.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-[300px]">
-        No completed tasks
-      </div>
-    );
+    return <div className="flex justify-center items-center h-[300px]">No completed tasks</div>
   }
 
   return (
@@ -90,5 +72,6 @@ export function FamilyProgress() {
         </PieChart>
       </ResponsiveContainer>
     </div>
-  );
+  )
 }
+

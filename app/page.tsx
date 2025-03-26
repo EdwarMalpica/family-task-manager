@@ -1,44 +1,35 @@
-"use client";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { RecentTasks } from "@/components/recent-tasks";
-import { FamilyProgress } from "@/components/family-progress";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { useAlertDialog } from "@/contexts/alert-dialog-context";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { useState, useMemo } from "react";
-import { CreateTaskModal } from "@/components/create-task-modal";
-import { useTaskContext } from "@/contexts/task-context";
+"use client"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { RecentTasks } from "@/components/recent-tasks"
+import { FamilyProgress } from "@/components/family-progress"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { useAlertDialog } from "@/contexts/alert-dialog-context"
+import { Search } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { useState, useMemo } from "react"
+import { TaskModal } from "@/components/task-modal"
+import { useTaskContext } from "@/contexts/task-context"
 
 export default function DashboardPage() {
-  const { showDialog } = useAlertDialog();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const { tasks } = useTaskContext();
+  const { showDialog } = useAlertDialog()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const { tasks } = useTaskContext()
 
   const stats = useMemo(() => {
-    const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(
-      (task) => task.status === "completed"
-    ).length;
-    const pendingTasks = totalTasks - completedTasks;
-    const completionRate =
-      totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const totalTasks = tasks.length
+    const completedTasks = tasks.filter((task) => task.status === "completed").length
+    const pendingTasks = totalTasks - completedTasks
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
     const changeFromLastWeek = {
       total: "+2",
       completed: "+4",
       pending: "-2",
       rate: "+5%",
-    };
+    }
 
     return {
       totalTasks,
@@ -46,8 +37,8 @@ export default function DashboardPage() {
       pendingTasks,
       completionRate,
       changeFromLastWeek,
-    };
-  }, [tasks]);
+    }
+  }, [tasks])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -68,69 +59,47 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-              <p className="text-muted-foreground">
-                Manage your family's tasks and track progress.
-              </p>
+              <p className="text-muted-foreground">Manage your family's tasks and track progress.</p>
             </div>
             <div className="flex">
-              <Button onClick={() => setIsCreateModalOpen(true)}>
-                Create New Task
-              </Button>
+              <Button onClick={() => setIsCreateModalOpen(true)}>Create New Task</Button>
             </div>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Tasks
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalTasks}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats.changeFromLastWeek.total} from last week
-                </p>
+                <p className="text-xs text-muted-foreground">{stats.changeFromLastWeek.total} from last week</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Completed Tasks
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Completed Tasks</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.completedTasks}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats.changeFromLastWeek.completed} from last week
-                </p>
+                <p className="text-xs text-muted-foreground">{stats.changeFromLastWeek.completed} from last week</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Pending Tasks
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.pendingTasks}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats.changeFromLastWeek.pending} from last week
-                </p>
+                <p className="text-xs text-muted-foreground">{stats.changeFromLastWeek.pending} from last week</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Completion Rate
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats.completionRate}%
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {stats.changeFromLastWeek.rate} from last week
-                </p>
+                <div className="text-2xl font-bold">{stats.completionRate}%</div>
+                <p className="text-xs text-muted-foreground">{stats.changeFromLastWeek.rate} from last week</p>
               </CardContent>
             </Card>
           </div>
@@ -138,9 +107,7 @@ export default function DashboardPage() {
             <Card className="md:col-span-7 col-span-4">
               <CardHeader>
                 <CardTitle>Family Progress</CardTitle>
-                <CardDescription>
-                  Task completion by family member
-                </CardDescription>
+                <CardDescription>Task completion by family member</CardDescription>
               </CardHeader>
               <CardContent>
                 <FamilyProgress />
@@ -152,9 +119,7 @@ export default function DashboardPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <CardTitle>All Tasks</CardTitle>
-                  <CardDescription>
-                    Manage and track your family's tasks
-                  </CardDescription>
+                  <CardDescription>Manage and track your family's tasks</CardDescription>
                 </div>
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -174,10 +139,8 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      <CreateTaskModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-      />
+      <TaskModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} mode="create" />
     </div>
-  );
+  )
 }
+

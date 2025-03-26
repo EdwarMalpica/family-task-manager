@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { CreateTaskModal } from "@/components/create-task-modal"
+import { TaskModal } from "@/components/task-modal"
 import { useState } from "react"
 
 const familyMembers = [
@@ -118,7 +118,7 @@ export default function FamilyPage() {
       </main>
 
       {/* Modal para crear tareas */}
-      <CreateTaskModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
+      <TaskModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} mode="create" />
     </div>
   )
 }

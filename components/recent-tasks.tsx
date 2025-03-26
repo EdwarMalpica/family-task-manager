@@ -1,176 +1,150 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useRef } from "react";
-import {
-  CheckCircle2,
-  Clock,
-  Trash2,
-  Filter,
-  ArrowUp,
-  ArrowDown,
-  ArrowUpDown,
-} from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useAlertDialog } from "@/contexts/alert-dialog-context";
-import { toast } from "sonner";
-import { useTaskContext } from "@/contexts/task-context";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
+import { useState, useEffect, useRef } from "react"
+import { CheckCircle2, Clock, Trash2, Filter, ArrowUp, ArrowDown, ArrowUpDown, Edit } from "lucide-react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { useAlertDialog } from "@/contexts/alert-dialog-context"
+import { toast } from "sonner"
+import { useTaskContext } from "@/contexts/task-context"
+import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
+import { TaskModal } from "./task-modal"
+import type { Task } from "@/types"
 
 interface RecentTasksProps {
-  searchQuery?: string;
+  searchQuery?: string
 }
 
 type SortConfig = {
-  key: string;
-  direction: "asc" | "desc" | null;
-};
+  key: string
+  direction: "asc" | "desc" | null
+}
 
 export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
-  const { tasks, deleteTask, updateTask, restoreTask } = useTaskContext();
-  const { showDialog } = useAlertDialog();
-  const tableRef = useRef<HTMLDivElement>(null);
+  const { tasks, deleteTask, updateTask, restoreTask } = useTaskContext()
+  const { showDialog } = useAlertDialog()
+  const tableRef = useRef<HTMLDivElement>(null)
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const tasksPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1)
+  const tasksPerPage = 5
 
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [assigneeFilter, setAssigneeFilter] = useState<string[]>([]);
-  const [recurringFilter, setRecurringFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([])
+  const [assigneeFilter, setAssigneeFilter] = useState<string[]>([])
+  const [recurringFilter, setRecurringFilter] = useState<string[]>([])
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: "",
     direction: null,
-  });
+  })
 
-  const uniqueAssignees = [...new Set(tasks.map((task) => task.assignee))];
-  const uniqueRecurring = [...new Set(tasks.map((task) => task.recurring))];
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+
+  const uniqueAssignees = [...new Set(tasks.map((task) => task.assignee))]
+  const uniqueRecurring = [...new Set(tasks.map((task) => task.recurring))]
 
   const sortedTasks = [...tasks].sort((a, b) => {
-    if (!sortConfig.key || sortConfig.direction === null) return 0;
+    if (!sortConfig.key || sortConfig.direction === null) return 0
 
-    const aValue = a[sortConfig.key as keyof typeof a];
-    const bValue = b[sortConfig.key as keyof typeof b];
+    const aValue = a[sortConfig.key as keyof typeof a]
+    const bValue = b[sortConfig.key as keyof typeof b]
 
     if (sortConfig.key === "dueDate") {
       return sortConfig.direction === "asc"
-        ? new Date(aValue as string).getTime() -
-            new Date(bValue as string).getTime()
-        : new Date(bValue as string).getTime() -
-            new Date(aValue as string).getTime();
+        ? new Date(aValue as string).getTime() - new Date(bValue as string).getTime()
+        : new Date(bValue as string).getTime() - new Date(aValue as string).getTime()
     }
 
     if (typeof aValue === "string" && typeof bValue === "string") {
-      return sortConfig.direction === "asc"
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
+      return sortConfig.direction === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
     }
 
-    return 0;
-  });
+    return 0
+  })
 
   const requestSort = (key: string) => {
-    let direction: "asc" | "desc" | null = "asc";
+    let direction: "asc" | "desc" | null = "asc"
 
     if (sortConfig.key === key) {
       if (sortConfig.direction === "asc") {
-        direction = "desc";
+        direction = "desc"
       } else if (sortConfig.direction === "desc") {
-        direction = null;
+        direction = null
       }
     }
 
-    setSortConfig({ key, direction });
-  };
+    setSortConfig({ key, direction })
+  }
 
   const getSortDirectionIcon = (key: string) => {
     if (sortConfig.key !== key) {
-      return <ArrowUpDown className="h-4 w-4 ml-1" />;
+      return <ArrowUpDown className="h-4 w-4 ml-1" />
     }
 
     if (sortConfig.direction === "asc") {
-      return <ArrowUp className="h-4 w-4 ml-1" />;
+      return <ArrowUp className="h-4 w-4 ml-1" />
     }
 
     if (sortConfig.direction === "desc") {
-      return <ArrowDown className="h-4 w-4 ml-1" />;
+      return <ArrowDown className="h-4 w-4 ml-1" />
     }
 
-    return <ArrowUpDown className="h-4 w-4 ml-1" />;
-  };
+    return <ArrowUpDown className="h-4 w-4 ml-1" />
+  }
 
   const filteredTasks = sortedTasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.assignee.toLowerCase().includes(searchQuery.toLowerCase());
+      task.assignee.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesStatus =
-      statusFilter.length === 0 || statusFilter.includes(task.status);
+    const matchesStatus = statusFilter.length === 0 || statusFilter.includes(task.status)
 
-    const matchesAssignee =
-      assigneeFilter.length === 0 || assigneeFilter.includes(task.assignee);
+    const matchesAssignee = assigneeFilter.length === 0 || assigneeFilter.includes(task.assignee)
 
-    const matchesRecurring =
-      recurringFilter.length === 0 || recurringFilter.includes(task.recurring);
+    const matchesRecurring = recurringFilter.length === 0 || recurringFilter.includes(task.recurring)
 
-    return (
-      matchesSearch && matchesStatus && matchesAssignee && matchesRecurring
-    );
-  });
+    return matchesSearch && matchesStatus && matchesAssignee && matchesRecurring
+  })
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter, assigneeFilter, recurringFilter]);
+    setCurrentPage(1)
+  }, [searchQuery, statusFilter, assigneeFilter, recurringFilter])
 
-  const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
-  const paginatedTasks = filteredTasks.slice(
-    (currentPage - 1) * tasksPerPage,
-    currentPage * tasksPerPage
-  );
+  const totalPages = Math.ceil(filteredTasks.length / tasksPerPage)
+  const paginatedTasks = filteredTasks.slice((currentPage - 1) * tasksPerPage, currentPage * tasksPerPage)
 
   const handlePageChange = (newPage: number) => {
-    const scrollPosition = window.scrollY;
+    const scrollPosition = window.scrollY
 
-    setCurrentPage(newPage);
+    setCurrentPage(newPage)
 
     setTimeout(() => {
-      window.scrollTo(0, scrollPosition);
-    }, 0);
-  };
+      window.scrollTo(0, scrollPosition)
+    }, 0)
+  }
 
   const handleDeleteTask = (taskId: string) => {
-    let undo = false;
-    const taskIndex = tasks.findIndex((task) => task.id === taskId);
-    if (taskIndex === -1) return;
+    let undo = false
+    const taskIndex = tasks.findIndex((task) => task.id === taskId)
+    if (taskIndex === -1) return
 
-    deleteTask(taskId);
+    deleteTask(taskId)
 
     toast("Task Deleted", {
       description: "The task has been deleted",
       action: {
         label: "Undo",
         onClick: () => {
-          undo = true;
-          restoreTask();
+          undo = true
+          restoreTask()
         },
       },
       duration: 5000,
@@ -178,17 +152,22 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
         if (!undo) {
         }
       },
-    });
-  };
+    })
+  }
 
   const toggleTaskStatus = (id: string) => {
-    const task = tasks.find((task) => task.id === id);
-    if (!task) return;
+    const task = tasks.find((task) => task.id === id)
+    if (!task) return
 
     updateTask(id, {
       status: task.status === "completed" ? "pending" : "completed",
-    });
-  };
+    })
+  }
+
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task)
+    setIsEditModalOpen(true)
+  }
 
   return (
     <div className="w-full min-h-[400px]" ref={tableRef}>
@@ -206,11 +185,7 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
               <DropdownMenuCheckboxItem
                 checked={statusFilter.includes("completed")}
                 onCheckedChange={(checked) => {
-                  setStatusFilter((prev) =>
-                    checked
-                      ? [...prev, "completed"]
-                      : prev.filter((s) => s !== "completed")
-                  );
+                  setStatusFilter((prev) => (checked ? [...prev, "completed"] : prev.filter((s) => s !== "completed")))
                 }}
               >
                 Completed
@@ -218,11 +193,7 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
               <DropdownMenuCheckboxItem
                 checked={statusFilter.includes("pending")}
                 onCheckedChange={(checked) => {
-                  setStatusFilter((prev) =>
-                    checked
-                      ? [...prev, "pending"]
-                      : prev.filter((s) => s !== "pending")
-                  );
+                  setStatusFilter((prev) => (checked ? [...prev, "pending"] : prev.filter((s) => s !== "pending")))
                 }}
               >
                 Pending
@@ -244,11 +215,7 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
                   key={assignee}
                   checked={assigneeFilter.includes(assignee)}
                   onCheckedChange={(checked) => {
-                    setAssigneeFilter((prev) =>
-                      checked
-                        ? [...prev, assignee]
-                        : prev.filter((a) => a !== assignee)
-                    );
+                    setAssigneeFilter((prev) => (checked ? [...prev, assignee] : prev.filter((a) => a !== assignee)))
                   }}
                 >
                   {assignee}
@@ -271,11 +238,7 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
                   key={recurring}
                   checked={recurringFilter.includes(recurring)}
                   onCheckedChange={(checked) => {
-                    setRecurringFilter((prev) =>
-                      checked
-                        ? [...prev, recurring]
-                        : prev.filter((r) => r !== recurring)
-                    );
+                    setRecurringFilter((prev) => (checked ? [...prev, recurring] : prev.filter((r) => r !== recurring)))
                   }}
                 >
                   {recurring}
@@ -285,17 +248,15 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
           </DropdownMenu>
 
           {/* Clear Filters */}
-          {(statusFilter.length > 0 ||
-            assigneeFilter.length > 0 ||
-            recurringFilter.length > 0) && (
+          {(statusFilter.length > 0 || assigneeFilter.length > 0 || recurringFilter.length > 0) && (
             <Button
               variant="ghost"
               size="sm"
               className="h-8"
               onClick={() => {
-                setStatusFilter([]);
-                setAssigneeFilter([]);
-                setRecurringFilter([]);
+                setStatusFilter([])
+                setAssigneeFilter([])
+                setRecurringFilter([])
               }}
             >
               Clear Filters
@@ -309,45 +270,20 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]"></TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => requestSort("title")}
-              >
-                <div className="flex items-center">
-                  Task {getSortDirectionIcon("title")}
-                </div>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("title")}>
+                <div className="flex items-center">Task {getSortDirectionIcon("title")}</div>
               </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => requestSort("assignee")}
-              >
-                <div className="flex items-center">
-                  Assignee {getSortDirectionIcon("assignee")}
-                </div>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("assignee")}>
+                <div className="flex items-center">Assignee {getSortDirectionIcon("assignee")}</div>
               </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => requestSort("dueDate")}
-              >
-                <div className="flex items-center">
-                  Due Date {getSortDirectionIcon("dueDate")}
-                </div>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("dueDate")}>
+                <div className="flex items-center">Due Date {getSortDirectionIcon("dueDate")}</div>
               </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => requestSort("recurring")}
-              >
-                <div className="flex items-center">
-                  Recurring {getSortDirectionIcon("recurring")}
-                </div>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("recurring")}>
+                <div className="flex items-center">Recurring {getSortDirectionIcon("recurring")}</div>
               </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => requestSort("status")}
-              >
-                <div className="flex items-center">
-                  Status {getSortDirectionIcon("status")}
-                </div>
+              <TableHead className="cursor-pointer" onClick={() => requestSort("status")}>
+                <div className="flex items-center">Status {getSortDirectionIcon("status")}</div>
               </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -357,16 +293,11 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
               paginatedTasks.map((task) => (
                 <TableRow key={task.id}>
                   <TableCell>
-                    <Checkbox
-                      checked={task.status === "completed"}
-                      onCheckedChange={() => toggleTaskStatus(task.id)}
-                    />
+                    <Checkbox checked={task.status === "completed"} onCheckedChange={() => toggleTaskStatus(task.id)} />
                   </TableCell>
                   <TableCell className="font-medium">{task.title}</TableCell>
                   <TableCell>{task.assignee}</TableCell>
-                  <TableCell>
-                    {new Date(task.dueDate).toLocaleDateString("en-GB")}
-                  </TableCell>
+                  <TableCell>{new Date(task.dueDate).toLocaleDateString("en-GB")}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="capitalize">
                       {task.recurring}
@@ -374,9 +305,7 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={
-                        task.status === "completed" ? "success" : "secondary"
-                      }
+                      variant={task.status === "completed" ? "success" : "secondary"}
                       className="flex w-fit items-center gap-1"
                     >
                       {task.status === "completed" ? (
@@ -388,32 +317,31 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Trash2
-                      className="h-4 w-4 cursor-pointer hover:opacity-50 delay-200 ease-in-out ml-auto"
-                      onClick={() =>
-                        showDialog({
-                          title: "Delete Task?",
-                          description:
-                            "Are you sure you want to delete the task?",
-                          onConfirm: () => {
-                            handleDeleteTask(task.id);
-                          },
-                        })
-                      }
-                    />
+                    <div className="flex justify-end gap-2">
+                      <Edit
+                        className="h-4 w-4 cursor-pointer hover:opacity-50 delay-200 ease-in-out"
+                        onClick={() => handleEditTask(task)}
+                      />
+                      <Trash2
+                        className="h-4 w-4 cursor-pointer hover:opacity-50 delay-200 ease-in-out"
+                        onClick={() =>
+                          showDialog({
+                            title: "Delete Task?",
+                            description: "Are you sure you want to delete the task?",
+                            onConfirm: () => {
+                              handleDeleteTask(task.id)
+                            },
+                          })
+                        }
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="text-center text-gray-500 py-4"
-                >
-                  {searchQuery ||
-                  statusFilter.length > 0 ||
-                  assigneeFilter.length > 0 ||
-                  recurringFilter.length > 0
+                <TableCell colSpan={7} className="text-center text-gray-500 py-4">
+                  {searchQuery || statusFilter.length > 0 || assigneeFilter.length > 0 || recurringFilter.length > 0
                     ? "No tasks match your filters"
                     : "No tasks available"}
                 </TableCell>
@@ -433,11 +361,7 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
                 size="icon"
                 onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
                 disabled={currentPage === 1}
-                className={
-                  currentPage === 1
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
               >
                 <span className="sr-only">Go to previous page</span>
                 <svg
@@ -474,15 +398,9 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() =>
-                  handlePageChange(Math.min(currentPage + 1, totalPages))
-                }
+                onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className={
-                  currentPage === totalPages
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
               >
                 <span className="sr-only">Go to next page</span>
                 <svg
@@ -504,6 +422,10 @@ export function RecentTasks({ searchQuery = "" }: RecentTasksProps) {
           </PaginationContent>
         </Pagination>
       )}
+      {selectedTask && (
+        <TaskModal open={isEditModalOpen} onOpenChange={setIsEditModalOpen} task={selectedTask} mode="edit" />
+      )}
     </div>
-  );
+  )
 }
+
